@@ -1,0 +1,635 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
+package views;
+
+import controllers.BookController;
+import javax.swing.table.DefaultTableModel;
+import models.Book;
+
+/**
+ *
+ * @author trinh
+ */
+import java.sql.*;
+import javax.swing.JOptionPane;
+import javax.swing.table.TableModel;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JFrame;
+
+public class ManageBooks extends javax.swing.JFrame {
+
+    /**
+     * Creates new form ManageBooks
+     */
+    private BookController bookController;
+
+    private DefaultTableModel model;
+
+    public ManageBooks() {
+        initComponents();
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        bookController = new BookController(this);
+        setBookDetailsToTable(bookController.getAllBooks());
+        setCategoriesToComboBox();
+    }
+
+    public Book getUserInput() {
+        String bookID = txtBookID.getText();
+        String bookName = txtBookName.getText();
+        String category = comboCategory.getSelectedItem().toString();
+        String author = txtAuthor.getText();
+        String publisher = txtPublisher.getText();
+        int quantity;
+        int price;
+
+        if (txtQuantity.getText().equals("")) {
+            quantity = 0;
+        } else {
+            quantity = Integer.parseInt(txtQuantity.getText());
+        }
+
+        if (txtPrice.getText().equals("")) {
+            price = 0;
+        } else {
+            price = Integer.parseInt(txtPrice.getText());
+        }
+
+        return new Book(bookID, bookName, category, author, publisher, quantity, price);
+    }
+
+    public void displayBookDetails(Book book) {
+        txtBookID.setText(book.getId());
+        txtBookName.setText(book.getName());
+        comboCategory.setSelectedItem(book.getCategory());
+        txtAuthor.setText(book.getAuthor());
+        txtPublisher.setText(book.getPublisher());
+        txtQuantity.setText(String.valueOf(book.getQuantity()));
+        txtPrice.setText(String.valueOf(book.getPrice()));
+    }
+
+    public void setBookDetailsToTable(List<Book> books) {
+        clearTable();
+        for (Book book : books) {
+            String bookID = book.getId();
+            String bookName = book.getName();
+            String category = book.getCategory();
+            String author = book.getAuthor();
+            String publisher = book.getPublisher();
+            int quantity = book.getQuantity();
+            int price = book.getPrice();
+
+            Object[] obj = {bookID, bookName, category, author, publisher, quantity, price};
+            model = (DefaultTableModel) tbl_bookDetails.getModel();
+            model.addRow(obj);
+        }
+    }
+
+    public void setCategoriesToComboBox() {
+        for (String category : bookController.getAllCategories()) {
+            comboBoxCategory.addItem(category);
+        }
+    }
+
+    public void clearTable() {
+        DefaultTableModel model = (DefaultTableModel) tbl_bookDetails.getModel();
+        model.setRowCount(0);
+    }
+
+    public void clearFormInput() {
+        txtBookID.setText("");
+        txtBookName.setText("");
+        txtQuantity.setText("");
+        txtAuthor.setText("");
+        txtPublisher.setText("");
+        txtPrice.setText("");
+    }
+
+    public boolean validateUserInput() {
+        Book book = getUserInput();
+
+        if (book.getId().equals("")) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập mã sách");
+            return false;
+        }
+
+        if (book.getName().equals("")) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập tên sách");
+            return false;
+        }
+
+        if (book.getCategory().equals("")) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập thể loại");
+            return false;
+        }
+        
+        if (book.getAuthor().equals("")) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập tên tác giả");
+            return false;
+        }
+        if (book.getPublisher().equals("")) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập tên NXB");
+            return false;
+        }
+        if (book.getQuantity() < 1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập số lượng");
+            return false;
+        }
+        if (book.getPrice() < 1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập giá sách");
+            return false;
+        }
+
+        return true;
+    }
+
+    public void refreshTable() {
+        clearFormInput();
+        clearTable();
+        setBookDetailsToTable(bookController.getAllBooks());
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        buttonGroup1 = new javax.swing.ButtonGroup();
+        jPanel4 = new javax.swing.JPanel();
+        backButton = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        txtBookID = new app.bolivia.swing.JCTextField();
+        txtBookName = new app.bolivia.swing.JCTextField();
+        txtQuantity = new app.bolivia.swing.JCTextField();
+        jLabel11 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
+        jPanel6 = new javax.swing.JPanel();
+        lblQLSV = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        txtAuthor = new app.bolivia.swing.JCTextField();
+        txtPublisher = new app.bolivia.swing.JCTextField();
+        comboCategory = new javax.swing.JComboBox<>();
+        jLabel12 = new javax.swing.JLabel();
+        txtPrice = new app.bolivia.swing.JCTextField();
+        jLabel6 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tbl_bookDetails = new rojeru_san.complementos.RSTableMetro();
+        jPanel2 = new javax.swing.JPanel();
+        lblThongTinSV = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        txtFindID = new javax.swing.JTextField();
+        jPanel3 = new javax.swing.JPanel();
+        searchButton = new javax.swing.JButton();
+        btnSua = new rojeru_san.complementos.RSButtonHover();
+        btnXoa = new rojeru_san.complementos.RSButtonHover();
+        btnThem = new rojeru_san.complementos.RSButtonHover();
+        comboBoxCategory = new javax.swing.JComboBox<>();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanel4.setBackground(new java.awt.Color(100, 136, 234));
+        jPanel4.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        backButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/AddNewBookIcons/51516_arrow_back_left_icon.png"))); // NOI18N
+        backButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        backButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                backButtonMouseClicked(evt);
+            }
+        });
+        jPanel4.add(backButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 40, 50));
+
+        jLabel9.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel9.setText("Mã sách");
+        jPanel4.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 140, -1, -1));
+
+        txtBookID.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
+        txtBookID.setPlaceholder("Nhập mã sách");
+        txtBookID.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtBookIDActionPerformed(evt);
+            }
+        });
+        jPanel4.add(txtBookID, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 170, 370, 40));
+
+        txtBookName.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
+        txtBookName.setPlaceholder("Nhập tên sách");
+        txtBookName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtBookNameActionPerformed(evt);
+            }
+        });
+        jPanel4.add(txtBookName, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 260, 370, 40));
+
+        txtQuantity.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
+        txtQuantity.setPlaceholder("Nhập số lượng");
+        txtQuantity.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtQuantityActionPerformed(evt);
+            }
+        });
+        jPanel4.add(txtQuantity, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 630, 370, 40));
+
+        jLabel11.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel11.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel11.setText("Thể loại");
+        jPanel4.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 320, -1, -1));
+
+        jLabel2.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel2.setText("Số lượng");
+        jPanel4.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 600, -1, -1));
+
+        jLabel7.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel7.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel7.setText("Tên sách");
+        jPanel4.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 230, -1, -1));
+
+        jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jPanel4.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 50, 50));
+
+        jPanel6.setBackground(new java.awt.Color(204, 204, 204));
+        jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        lblQLSV.setBackground(new java.awt.Color(153, 153, 255));
+        lblQLSV.setFont(new java.awt.Font("Verdana", 0, 24)); // NOI18N
+        lblQLSV.setForeground(new java.awt.Color(102, 102, 102));
+        lblQLSV.setText("Quản lý sách");
+        jPanel6.add(lblQLSV, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 10, -1, -1));
+
+        jPanel4.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 10, 340, 50));
+
+        jLabel4.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel4.setText("Tác giả");
+        jPanel4.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 420, -1, -1));
+
+        jLabel5.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel5.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel5.setText("Nhà xuất bản");
+        jPanel4.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 510, -1, -1));
+
+        txtAuthor.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
+        txtAuthor.setPlaceholder("Nhập tác giả");
+        txtAuthor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtAuthorActionPerformed(evt);
+            }
+        });
+        jPanel4.add(txtAuthor, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 450, 370, 40));
+
+        txtPublisher.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
+        txtPublisher.setPlaceholder("Nhập nhà xuất bản");
+        txtPublisher.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPublisherActionPerformed(evt);
+            }
+        });
+        jPanel4.add(txtPublisher, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 540, 370, 40));
+
+        comboCategory.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        comboCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Giáo trình", "Sách tham khảo", " " }));
+        jPanel4.add(comboCategory, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 350, 370, 40));
+
+        jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/adminIcons/icons8_Book_Shelf_50px.png"))); // NOI18N
+        jPanel4.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 70, 60, 60));
+
+        txtPrice.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
+        txtPrice.setPlaceholder("Nhập số giá");
+        txtPrice.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPriceActionPerformed(evt);
+            }
+        });
+        jPanel4.add(txtPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 720, 370, 40));
+
+        jLabel6.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel6.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel6.setText("Giá");
+        jPanel4.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 690, -1, -1));
+
+        getContentPane().add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 430, 830));
+
+        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        tbl_bookDetails.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Số lượng", "Giá"
+            }
+        ));
+        tbl_bookDetails.setColorBordeFilas(new java.awt.Color(255, 255, 255));
+        tbl_bookDetails.setColorBordeHead(new java.awt.Color(255, 255, 255));
+        tbl_bookDetails.setRowHeight(30);
+        tbl_bookDetails.setShowGrid(false);
+        tbl_bookDetails.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tbl_bookDetailsMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(tbl_bookDetails);
+
+        jPanel1.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 270, 990, 360));
+
+        jPanel2.setBackground(new java.awt.Color(153, 153, 255));
+        jPanel2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+
+        lblThongTinSV.setFont(new java.awt.Font("Montserrat", 1, 48)); // NOI18N
+        lblThongTinSV.setText("Thông tin sách");
+        jPanel2.add(lblThongTinSV);
+
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 20, 990, 80));
+
+        jLabel1.setBackground(new java.awt.Color(153, 153, 153));
+        jLabel1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
+        jLabel1.setText("Tìm kiếm theo mã sách");
+        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 130, 250, 40));
+
+        jLabel3.setBackground(new java.awt.Color(204, 204, 204));
+        jLabel3.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
+        jLabel3.setText("Lọc theo thể loại sách");
+        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 190, 250, 40));
+
+        txtFindID.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txtFindID.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtFindIDActionPerformed(evt);
+            }
+        });
+        jPanel1.add(txtFindID, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 130, 310, 40));
+
+        jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jPanel1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 190, -1, 40));
+
+        searchButton.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        searchButton.setForeground(new java.awt.Color(0, 153, 255));
+        searchButton.setText("Tìm kiếm");
+        searchButton.setBorder(null);
+        searchButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchButtonActionPerformed(evt);
+            }
+        });
+        jPanel1.add(searchButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 160, 110, 40));
+
+        btnSua.setText("Sửa");
+        btnSua.setFont(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
+        btnSua.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSuaActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnSua, new org.netbeans.lib.awtextra.AbsoluteConstraints(870, 670, 120, 60));
+
+        btnXoa.setText("Xóa");
+        btnXoa.setFont(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
+        btnXoa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnXoaActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnXoa, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 670, 130, 60));
+
+        btnThem.setText("Thêm");
+        btnThem.setFont(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
+        btnThem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnThemActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnThem, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 670, 140, 60));
+
+        comboBoxCategory.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
+        comboBoxCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tất cả" }));
+        comboBoxCategory.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                comboBoxCategoryItemStateChanged(evt);
+            }
+        });
+        comboBoxCategory.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comboBoxCategoryActionPerformed(evt);
+            }
+        });
+        jPanel1.add(comboBoxCategory, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 190, 310, 40));
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 0, 1020, 830));
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void txtPriceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPriceActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtPriceActionPerformed
+
+    private void backButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_backButtonMouseClicked
+        HomePage homePage = new HomePage();
+        homePage.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_backButtonMouseClicked
+
+    private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchButtonActionPerformed
+        Book book = bookController.getBookById(txtFindID.getText());
+        if (book != null) {
+            displayBookDetails(book);
+        } else {
+            JOptionPane.showMessageDialog(this, "Không tìm thấy sách");
+        }
+    }//GEN-LAST:event_searchButtonActionPerformed
+
+    private void comboBoxCategoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboBoxCategoryActionPerformed
+
+    }//GEN-LAST:event_comboBoxCategoryActionPerformed
+
+    private void comboBoxCategoryItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comboBoxCategoryItemStateChanged
+        List<Book> books = bookController.getAllByCategory(comboBoxCategory.getSelectedItem().toString());
+
+        if (comboBoxCategory.getSelectedItem().equals("Tất cả")) {
+            refreshTable();
+        } else {
+            setBookDetailsToTable(books);
+        }
+    }//GEN-LAST:event_comboBoxCategoryItemStateChanged
+
+    private void txtBookIDActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtBookIDActionPerformed
+        // TODO add your handling code here:
+    }// GEN-LAST:event_txtBookIDActionPerformed
+
+    private void txtBookNameActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtBookNameActionPerformed
+        // TODO add your handling code here:
+    }// GEN-LAST:event_txtBookNameActionPerformed
+
+    private void txtQuantityActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtQuantityActionPerformed
+        // TODO add your handling code here:
+    }// GEN-LAST:event_txtQuantityActionPerformed
+
+    private void btnXoaActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnXoaActionPerformed
+        if (bookController.deleteBook(txtBookID.getText())) {
+            JOptionPane.showMessageDialog(this, "Xóa sách thành công");
+            refreshTable();
+        } else {
+            JOptionPane.showMessageDialog(this, "Xóa sách không thành công");
+        }
+
+    }// GEN-LAST:event_btnXoaActionPerformed
+
+    private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnThemActionPerformed
+        if (validateUserInput()) {
+            if (bookController.addNewBook(getUserInput())) {
+                JOptionPane.showMessageDialog(this, "Thêm sách thành công");
+                refreshTable();
+            } else {
+                JOptionPane.showMessageDialog(this, "Thêm sách không thành công");
+            }
+        }
+    }// GEN-LAST:event_btnThemActionPerformed
+
+    private void btnSuaActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnSuaActionPerformed
+        if (validateUserInput()) {
+            Book book = getUserInput();
+
+            if (bookController.updateBook(book)) {
+                JOptionPane.showMessageDialog(this, "Cập nhật sách thành công");
+                refreshTable();
+            } else {
+                JOptionPane.showMessageDialog(this, "Cập nhật sách không thành công");
+            }
+        }
+    }// GEN-LAST:event_btnSuaActionPerformed
+
+    private void tbl_bookDetailsMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_tbl_bookDetailsMouseClicked
+        int rowNo = tbl_bookDetails.getSelectedRow();
+        TableModel model = tbl_bookDetails.getModel();
+
+        txtBookID.setText(model.getValueAt(rowNo, 0).toString());
+        txtBookName.setText(model.getValueAt(rowNo, 1).toString());
+        comboCategory.setSelectedItem(model.getValueAt(rowNo, 2).toString());
+        txtAuthor.setText(model.getValueAt(rowNo, 3).toString());
+        txtPublisher.setText(model.getValueAt(rowNo, 4).toString());
+        txtQuantity.setText(model.getValueAt(rowNo, 5).toString());
+        txtPrice.setText(model.getValueAt(rowNo, 6).toString());
+    }// GEN-LAST:event_tbl_bookDetailsMouseClicked
+
+    private void txtAuthorActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtAuthorActionPerformed
+        // TODO add your handling code here:
+    }// GEN-LAST:event_txtAuthorActionPerformed
+
+    private void txtPublisherActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtPublisherActionPerformed
+        // TODO add your handling code here:
+    }// GEN-LAST:event_txtPublisherActionPerformed
+
+    private void txtFindIDActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtFindIDActionPerformed
+
+    }// GEN-LAST:event_txtFindIDActionPerformed
+
+    private void rbtGiaoTrinhActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_rbtGiaoTrinhActionPerformed
+        // TODO add your handling code here:
+    }// GEN-LAST:event_rbtGiaoTrinhActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        // <editor-fold defaultstate="collapsed" desc=" Look and feel setting code
+        // (optional) ">
+        /*
+         * If Nimbus (introduced in Java SE 6) is not available, stay with the default
+         * look and feel.
+         * For details see
+         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(ManageBooks.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(ManageBooks.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(ManageBooks.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(ManageBooks.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
+        }
+        // </editor-fold>
+        // </editor-fold>
+        // </editor-fold>
+        // </editor-fold>
+        // </editor-fold>
+        // </editor-fold>
+        // </editor-fold>
+        // </editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new ManageBooks().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel backButton;
+    private rojeru_san.complementos.RSButtonHover btnSua;
+    private rojeru_san.complementos.RSButtonHover btnThem;
+    private rojeru_san.complementos.RSButtonHover btnXoa;
+    private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JComboBox<String> comboBoxCategory;
+    private javax.swing.JComboBox<String> comboCategory;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel lblQLSV;
+    private javax.swing.JLabel lblThongTinSV;
+    private javax.swing.JButton searchButton;
+    private rojeru_san.complementos.RSTableMetro tbl_bookDetails;
+    private app.bolivia.swing.JCTextField txtAuthor;
+    private app.bolivia.swing.JCTextField txtBookID;
+    private app.bolivia.swing.JCTextField txtBookName;
+    private javax.swing.JTextField txtFindID;
+    private app.bolivia.swing.JCTextField txtPrice;
+    private app.bolivia.swing.JCTextField txtPublisher;
+    private app.bolivia.swing.JCTextField txtQuantity;
+    // End of variables declaration//GEN-END:variables
+}
