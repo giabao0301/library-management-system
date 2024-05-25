@@ -13,7 +13,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  *
- * @author lethi
+ * @author trinh
  */
 public class ReturnBook extends javax.swing.JFrame {
 

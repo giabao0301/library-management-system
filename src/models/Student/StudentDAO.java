@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package models;
+package models.Student;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,21 +26,20 @@ public class StudentDAO {
 
         try {
             Connection connect = DBConnection.getConnection();
-            String sql = "select * from student_details";
+            String sql = "select * from student";
             PreparedStatement pst = connect.prepareStatement(sql);
 
             ResultSet rs = pst.executeQuery();
 
             while (rs.next()) {
-
-                String studentID = rs.getString("studentID");
-                String studentName = rs.getString("StudentName");
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
                 String gender = rs.getString("gender");
                 LocalDate birthday = rs.getDate("birthday").toLocalDate();
-                String studentEmail = rs.getString("studentEmail");
+                String email = rs.getString("email");
                 String major = rs.getString("major");
 
-                students.add(new Student(studentID, studentName, gender, birthday, studentEmail, major));
+                students.add(new Student(id, name, gender, birthday, email, major));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -53,10 +52,10 @@ public class StudentDAO {
         try {
             Connection connect = DBConnection.getConnection();
 
-            String sql = "INSERT INTO student_details ( studentID, studentName, gender, birthday, studentEmail, major )VALUES (?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO student ( id, name, gender, birthday, email, major )VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement pst = connect.prepareStatement(sql);
 
-            pst.setString(1, student.getId());
+            pst.setInt(1, student.getId());
             pst.setString(2, student.getName());
             pst.setString(3, student.getGender());
             pst.setDate(4, java.sql.Date.valueOf(student.getBirthday()));
@@ -79,14 +78,14 @@ public class StudentDAO {
         return false;
     }
 
-    public boolean deleteById(String studentId) {
+    public boolean deleteById(int studentId) {
         try {
             Connection connect = DBConnection.getConnection();
 
-            String sql = "DELETE FROM student_details WHERE studentId = ?";
+            String sql = "DELETE FROM student WHERE id = ?";
             PreparedStatement pst = connect.prepareStatement(sql);
 
-            pst.setString(1, studentId);
+            pst.setInt(1, studentId);
 
             int updatedRowCount = pst.executeUpdate();
 
@@ -108,16 +107,16 @@ public class StudentDAO {
         try {
             Connection connect = DBConnection.getConnection();
 
-            String sql = "UPDATE student_details SET studentId = ?, studentName = ?, gender = ?, birthday = ?, studentEmail = ?, major = ? WHERE studentId = ?";
+            String sql = "UPDATE student SET id = ?, name = ?, gender = ?, birthday = ?, email = ?, major = ? WHERE id = ?";
             PreparedStatement pst = connect.prepareStatement(sql);
 
-            pst.setString(1, student.getId());
+            pst.setInt(1, student.getId());
             pst.setString(2, student.getName());
             pst.setString(3, student.getGender());
             pst.setDate(4, java.sql.Date.valueOf(student.getBirthday()));
             pst.setString(5, student.getEmail());
             pst.setString(6, student.getMajor());
-            pst.setString(7, student.getId());
+            pst.setInt(7, student.getId());
 
             int updatedRowCount = pst.executeUpdate();
 
@@ -135,27 +134,27 @@ public class StudentDAO {
         return false;
     }
 
-    public Student findById(String studentId) {
+    public Student findById(int studentId) {
         Student student = new Student();
 
         try {
             Connection connect = DBConnection.getConnection();
-            String sql = "select * from student_details where studentId = ?";
+            String sql = "select * from student where id = ?";
             PreparedStatement pst = connect.prepareStatement(sql);
 
-            pst.setString(1, studentId);
+            pst.setInt(1, studentId);
 
             ResultSet rs = pst.executeQuery();
 
             if (rs.next()) {
-                String studentID = rs.getString("studentID");
-                String studentName = rs.getString("StudentName");
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
                 String gender = rs.getString("gender");
                 LocalDate birthday = rs.getDate("birthday").toLocalDate();
-                String studentEmail = rs.getString("studentEmail");
+                String email = rs.getString("email");
                 String major = rs.getString("major");
 
-                student = new Student(studentID, studentName, gender, birthday, studentEmail, major);
+                student = new Student(id, name, gender, birthday, email, major);
             } else {
                 student = null;
             }
@@ -172,7 +171,7 @@ public class StudentDAO {
         try {
             Connection connect = DBConnection.getConnection();
 
-            String sql = "SELECT DISTINCT major FROM `student_details` WHERE 1";
+            String sql = "SELECT DISTINCT major FROM `student` WHERE 1";
 
             PreparedStatement pst = connect.prepareStatement(sql);
 
@@ -197,7 +196,7 @@ public class StudentDAO {
 
         try {
             Connection connect = DBConnection.getConnection();
-            String sql = "select * from student_details where major = ?";
+            String sql = "select * from student where major = ?";
             PreparedStatement pst = connect.prepareStatement(sql);
 
             pst.setString(1, studentMajor);
@@ -205,14 +204,14 @@ public class StudentDAO {
             ResultSet rs = pst.executeQuery();
 
             while (rs.next()) {
-                String studentID = rs.getString("studentID");
-                String studentName = rs.getString("StudentName");
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
                 String gender = rs.getString("gender");
                 LocalDate birthday = rs.getDate("birthday").toLocalDate();
-                String studentEmail = rs.getString("studentEmail");
+                String email = rs.getString("email");
                 String major = rs.getString("major");
 
-                students.add(new Student(studentID, studentName, gender, birthday, studentEmail, major));
+                students.add(new Student(id, name, gender, birthday, email, major));
             }
         } catch (Exception e) {
             e.printStackTrace();

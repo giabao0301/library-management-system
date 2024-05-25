@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package models;
+package models.Book;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -22,16 +22,16 @@ public class BookDAO {
         try {
             Connection connect = DBConnection.getConnection();
 
-            String sql = "INSERT INTO book_details ( bookID, bookName, category, author, publisher, quantity, price )VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO book ( id, title, author, genre, publisher, price, quantity)VALUES (?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement pst = connect.prepareStatement(sql);
 
             pst.setString(1, book.getId());
-            pst.setString(2, book.getName());
-            pst.setString(3, book.getCategory());
-            pst.setString(4, book.getAuthor());
+            pst.setString(2, book.getTitle());
+            pst.setString(3, book.getAuthor());
+            pst.setString(4, book.getGenre());
             pst.setString(5, book.getPublisher());
-            pst.setInt(6, book.getQuantity());
-            pst.setInt(7, book.getPrice());
+            pst.setDouble(6, book.getPrice());
+            pst.setInt(7, book.getQuantity());
 
             int updatedRowCount = pst.executeUpdate();
 
@@ -54,21 +54,21 @@ public class BookDAO {
 
         try {
             Connection connect = DBConnection.getConnection();
-            String sql = "select * from book_details";
+            String sql = "select * from book";
             PreparedStatement pst = connect.prepareStatement(sql);
 
             ResultSet rs = pst.executeQuery();
 
             while (rs.next()) {
-                String bookID = rs.getString("bookID");
-                String bookName = rs.getString("bookName");
-                String category = rs.getString("category");
+                String id = rs.getString("id");
+                String title = rs.getString("title");
                 String author = rs.getString("author");
+                String genre = rs.getString("genre");
                 String publisher = rs.getString("publisher");
                 int quantity = rs.getInt("quantity");
                 int price = rs.getInt("price");
 
-                books.add(new Book(bookID, bookName, category, author, publisher, quantity, price));
+                books.add(new Book(id, title, author, genre, publisher, price, quantity));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,7 +82,7 @@ public class BookDAO {
 
         try {
             Connection connect = DBConnection.getConnection();
-            String sql = "select * from book_details where bookId = ?";
+            String sql = "select * from book where id = ?";
             PreparedStatement pst = connect.prepareStatement(sql);
 
             pst.setString(1, bookId);
@@ -90,15 +90,15 @@ public class BookDAO {
             ResultSet rs = pst.executeQuery();
 
             if (rs.next()) {
-                String id = rs.getString("bookID");
-                String name = rs.getString("bookName");
-                String category = rs.getString("category");
+                String id = rs.getString("id");
+                String title = rs.getString("title");
+                String genre = rs.getString("genre");
                 String author = rs.getString("author");
                 String publisher = rs.getString("publisher");
                 int quantity = rs.getInt("quantity");
                 int price = rs.getInt("price");
 
-                book = new Book(id, name, category, author, publisher, quantity, price);
+                book = new Book(id, title, author, genre, publisher, price, quantity);
             } else {
                 book = null;
             }
@@ -109,14 +109,14 @@ public class BookDAO {
         return book;
     }
 
-    public boolean deleteById(String id) {
+    public boolean deleteById(String bookId) {
         try {
             Connection connect = DBConnection.getConnection();
 
-            String sql = "DELETE FROM book_details WHERE bookID = ?";
+            String sql = "DELETE FROM book WHERE id = ?";
             PreparedStatement pst = connect.prepareStatement(sql);
 
-            pst.setString(1, id);
+            pst.setString(1, bookId);
 
             int updatedRowCount = pst.executeUpdate();
 
@@ -138,16 +138,16 @@ public class BookDAO {
         try {
             Connection connect = DBConnection.getConnection();
 
-            String sql = "UPDATE book_details SET bookId = ?, bookName = ?, category = ?, author = ?, publisher = ?, quantity = ?, price = ? WHERE bookId = ?";
+            String sql = "UPDATE book SET id = ?, title = ?, author = ?, genre = ?,  publisher = ?, quantity = ?, price = ? WHERE id = ?";
             PreparedStatement pst = connect.prepareStatement(sql);
 
             pst.setString(1, book.getId());
-            pst.setString(2, book.getName());
-            pst.setString(3, book.getCategory());
+            pst.setString(2, book.getTitle());
+            pst.setString(3, book.getGenre());
             pst.setString(4, book.getAuthor());
             pst.setString(5, book.getPublisher());
             pst.setInt(6, book.getQuantity());
-            pst.setInt(7, book.getPrice());
+            pst.setDouble(7, book.getPrice());
             pst.setString(8, book.getId());
 
             int updatedRowCount = pst.executeUpdate();
@@ -172,14 +172,14 @@ public class BookDAO {
         try {
             Connection connect = DBConnection.getConnection();
 
-            String sql = "SELECT DISTINCT category FROM `book_details` WHERE 1";
+            String sql = "SELECT DISTINCT genre FROM `book` WHERE 1";
 
             PreparedStatement pst = connect.prepareStatement(sql);
 
             ResultSet rs = pst.executeQuery();
 
             while (rs.next()) {
-                categories.add(rs.getString("category"));
+                categories.add(rs.getString("genre"));
             }
 
             pst.close();
@@ -192,28 +192,28 @@ public class BookDAO {
         return categories;
     }
 
-    public List<Book> findAllByCategory(String bookCategory) {
+    public List<Book> findAllByGenre(String bookGenre) {
         List<Book> books = new ArrayList<>();
 
         try {
             Connection connect = DBConnection.getConnection();
-            String sql = "select * from book_details where category = ?";
+            String sql = "select * from book where genre = ?";
             PreparedStatement pst = connect.prepareStatement(sql);
 
-            pst.setString(1, bookCategory);
+            pst.setString(1, bookGenre);
 
             ResultSet rs = pst.executeQuery();
 
             while (rs.next()) {
-                String id = rs.getString("bookID");
-                String name = rs.getString("bookName");
-                String category = rs.getString("category");
+                String id = rs.getString("id");
+                String title = rs.getString("title");
+                String genre = rs.getString("genre");
                 String author = rs.getString("author");
                 String publisher = rs.getString("publisher");
                 int quantity = rs.getInt("quantity");
                 int price = rs.getInt("price");
 
-                books.add(new Book(id, name, category, author, publisher, quantity, price));
+                books.add(new Book(id, title, author, genre, publisher, price, quantity));
             }
         } catch (Exception e) {
             e.printStackTrace();

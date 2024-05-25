@@ -6,7 +6,7 @@ package views;
 
 import controllers.BookController;
 import javax.swing.table.DefaultTableModel;
-import models.Book;
+import models.Book.Book;
 
 /**
  *
@@ -39,9 +39,9 @@ public class ManageBooks extends javax.swing.JFrame {
     }
 
     public Book getUserInput() {
-        String bookID = txtBookID.getText();
+        String bookId = txtBookID.getText();
         String bookName = txtBookName.getText();
-        String category = comboCategory.getSelectedItem().toString();
+        String category = txtGenre.getText();
         String author = txtAuthor.getText();
         String publisher = txtPublisher.getText();
         int quantity;
@@ -59,13 +59,13 @@ public class ManageBooks extends javax.swing.JFrame {
             price = Integer.parseInt(txtPrice.getText());
         }
 
-        return new Book(bookID, bookName, category, author, publisher, quantity, price);
+        return new Book(bookId, bookName, author, category, publisher, price, quantity);
     }
 
     public void displayBookDetails(Book book) {
         txtBookID.setText(book.getId());
-        txtBookName.setText(book.getName());
-        comboCategory.setSelectedItem(book.getCategory());
+        txtBookName.setText(book.getTitle());
+        txtGenre.setText(book.getGenre());
         txtAuthor.setText(book.getAuthor());
         txtPublisher.setText(book.getPublisher());
         txtQuantity.setText(String.valueOf(book.getQuantity()));
@@ -75,15 +75,15 @@ public class ManageBooks extends javax.swing.JFrame {
     public void setBookDetailsToTable(List<Book> books) {
         clearTable();
         for (Book book : books) {
-            String bookID = book.getId();
-            String bookName = book.getName();
-            String category = book.getCategory();
+            String id = book.getId();
+            String title = book.getTitle();
+            String genre = book.getGenre();
             String author = book.getAuthor();
             String publisher = book.getPublisher();
             int quantity = book.getQuantity();
             int price = book.getPrice();
 
-            Object[] obj = {bookID, bookName, category, author, publisher, quantity, price};
+            Object[] obj = {id, title, author, genre, publisher, price, quantity};
             model = (DefaultTableModel) tbl_bookDetails.getModel();
             model.addRow(obj);
         }
@@ -104,9 +104,10 @@ public class ManageBooks extends javax.swing.JFrame {
         txtBookID.setText("");
         txtBookName.setText("");
         txtQuantity.setText("");
-        txtAuthor.setText("");
+        txtGenre.setText("");
         txtPublisher.setText("");
         txtPrice.setText("");
+        txtAuthor.setText("");
     }
 
     public boolean validateUserInput() {
@@ -117,16 +118,16 @@ public class ManageBooks extends javax.swing.JFrame {
             return false;
         }
 
-        if (book.getName().equals("")) {
+        if (book.getTitle().equals("")) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập tên sách");
             return false;
         }
 
-        if (book.getCategory().equals("")) {
+        if (book.getGenre().equals("")) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập thể loại");
             return false;
         }
-        
+
         if (book.getAuthor().equals("")) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập tên tác giả");
             return false;
@@ -176,14 +177,14 @@ public class ManageBooks extends javax.swing.JFrame {
         jPanel5 = new javax.swing.JPanel();
         jPanel6 = new javax.swing.JPanel();
         lblQLSV = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        txtAuthor = new app.bolivia.swing.JCTextField();
         txtPublisher = new app.bolivia.swing.JCTextField();
-        comboCategory = new javax.swing.JComboBox<>();
         jLabel12 = new javax.swing.JLabel();
         txtPrice = new app.bolivia.swing.JCTextField();
         jLabel6 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        txtAuthor = new app.bolivia.swing.JCTextField();
+        txtGenre = new app.bolivia.swing.JCTextField();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tbl_bookDetails = new rojeru_san.complementos.RSTableMetro();
@@ -245,17 +246,17 @@ public class ManageBooks extends javax.swing.JFrame {
                 txtQuantityActionPerformed(evt);
             }
         });
-        jPanel4.add(txtQuantity, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 630, 370, 40));
+        jPanel4.add(txtQuantity, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 720, 370, 40));
 
         jLabel11.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
         jLabel11.setForeground(new java.awt.Color(255, 255, 255));
         jLabel11.setText("Thể loại");
-        jPanel4.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 320, -1, -1));
+        jPanel4.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 410, -1, -1));
 
         jLabel2.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("Số lượng");
-        jPanel4.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 600, -1, -1));
+        jPanel4.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 690, -1, -1));
 
         jLabel7.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(255, 255, 255));
@@ -276,24 +277,10 @@ public class ManageBooks extends javax.swing.JFrame {
 
         jPanel4.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 10, 340, 50));
 
-        jLabel4.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
-        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel4.setText("Tác giả");
-        jPanel4.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 420, -1, -1));
-
         jLabel5.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(255, 255, 255));
         jLabel5.setText("Nhà xuất bản");
         jPanel4.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 510, -1, -1));
-
-        txtAuthor.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
-        txtAuthor.setPlaceholder("Nhập tác giả");
-        txtAuthor.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtAuthorActionPerformed(evt);
-            }
-        });
-        jPanel4.add(txtAuthor, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 450, 370, 40));
 
         txtPublisher.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
         txtPublisher.setPlaceholder("Nhập nhà xuất bản");
@@ -304,26 +291,35 @@ public class ManageBooks extends javax.swing.JFrame {
         });
         jPanel4.add(txtPublisher, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 540, 370, 40));
 
-        comboCategory.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        comboCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Giáo trình", "Sách tham khảo", " " }));
-        jPanel4.add(comboCategory, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 350, 370, 40));
-
         jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/adminIcons/icons8_Book_Shelf_50px.png"))); // NOI18N
         jPanel4.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 70, 60, 60));
 
         txtPrice.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
-        txtPrice.setPlaceholder("Nhập số giá");
+        txtPrice.setPlaceholder("Nhập giá");
         txtPrice.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtPriceActionPerformed(evt);
             }
         });
-        jPanel4.add(txtPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 720, 370, 40));
+        jPanel4.add(txtPrice, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 630, 370, 40));
 
         jLabel6.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(255, 255, 255));
         jLabel6.setText("Giá");
-        jPanel4.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 690, -1, -1));
+        jPanel4.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 600, -1, -1));
+
+        jLabel8.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel8.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel8.setText("Tác giả");
+        jPanel4.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 320, -1, -1));
+
+        txtAuthor.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
+        txtAuthor.setPlaceholder("Nhập tác giả");
+        jPanel4.add(txtAuthor, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 350, 370, 40));
+
+        txtGenre.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
+        txtGenre.setPlaceholder("Nhập thể loại");
+        jPanel4.add(txtGenre, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 440, 370, 40));
 
         getContentPane().add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 430, 830));
 
@@ -334,7 +330,7 @@ public class ManageBooks extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Mã sách", "Tên sách", "Thể loại", "Tác giả", "Nhà xuất bản", "Số lượng", "Giá"
+                "Mã sách", "Tên sách", "Tác giả", "Thể loại", "Nhà xuất bản", "Giá", "Số lượng"
             }
         ));
         tbl_bookDetails.setColorBordeFilas(new java.awt.Color(255, 255, 255));
@@ -470,9 +466,9 @@ public class ManageBooks extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_comboBoxCategoryItemStateChanged
 
-    private void txtBookIDActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtBookIDActionPerformed
+    private void txtBookIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBookIDActionPerformed
         // TODO add your handling code here:
-    }// GEN-LAST:event_txtBookIDActionPerformed
+    }//GEN-LAST:event_txtBookIDActionPerformed
 
     private void txtBookNameActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtBookNameActionPerformed
         // TODO add your handling code here:
@@ -522,11 +518,11 @@ public class ManageBooks extends javax.swing.JFrame {
 
         txtBookID.setText(model.getValueAt(rowNo, 0).toString());
         txtBookName.setText(model.getValueAt(rowNo, 1).toString());
-        comboCategory.setSelectedItem(model.getValueAt(rowNo, 2).toString());
-        txtAuthor.setText(model.getValueAt(rowNo, 3).toString());
+        txtAuthor.setText(model.getValueAt(rowNo, 2).toString());
+        txtGenre.setText(model.getValueAt(rowNo, 3).toString());
         txtPublisher.setText(model.getValueAt(rowNo, 4).toString());
-        txtQuantity.setText(model.getValueAt(rowNo, 5).toString());
-        txtPrice.setText(model.getValueAt(rowNo, 6).toString());
+        txtPrice.setText(model.getValueAt(rowNo, 5).toString());
+        txtQuantity.setText(model.getValueAt(rowNo, 6).toString());
     }// GEN-LAST:event_tbl_bookDetailsMouseClicked
 
     private void txtAuthorActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_txtAuthorActionPerformed
@@ -602,16 +598,15 @@ public class ManageBooks extends javax.swing.JFrame {
     private rojeru_san.complementos.RSButtonHover btnXoa;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<String> comboBoxCategory;
-    private javax.swing.JComboBox<String> comboCategory;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -628,6 +623,7 @@ public class ManageBooks extends javax.swing.JFrame {
     private app.bolivia.swing.JCTextField txtBookID;
     private app.bolivia.swing.JCTextField txtBookName;
     private javax.swing.JTextField txtFindID;
+    private app.bolivia.swing.JCTextField txtGenre;
     private app.bolivia.swing.JCTextField txtPrice;
     private app.bolivia.swing.JCTextField txtPublisher;
     private app.bolivia.swing.JCTextField txtQuantity;

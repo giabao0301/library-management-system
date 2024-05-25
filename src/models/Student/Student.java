@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package models;
+package models.Student;
 
 import java.time.LocalDate;
 
@@ -11,7 +11,7 @@ import java.time.LocalDate;
  * @author lethi
  */
 public class Student {
-    private String id;
+    private int id;
     private String name;
     private String gender;
     private LocalDate birthday;
@@ -21,8 +21,13 @@ public class Student {
     public Student() {
         
     }
+
+    public Student(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
     
-    public Student(String id, String name, String gender, LocalDate birthday, String email, String major) {
+    public Student(int id, String name, String gender, LocalDate birthday, String email, String major) {
         this.id = id;
         this.name = name;
         this.gender = gender;
@@ -31,11 +36,11 @@ public class Student {
         this.major = major;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

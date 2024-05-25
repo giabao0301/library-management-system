@@ -5,8 +5,9 @@
 package controllers;
 
 import java.util.List;
-import models.Student;
-import models.StudentDAO;
+import models.Student.Student;
+import models.Student.StudentDAO;
+import views.IssueBook;
 import views.ManageStudents;
 
 /**
@@ -17,12 +18,18 @@ public class StudentController {
 
     private ManageStudents manageStudents;
     private StudentDAO studentDAO;
-
+    private IssueBook issueBook;
+    
     public StudentController(ManageStudents manageStudents) {
         this.manageStudents = manageStudents;
         studentDAO = new StudentDAO();
     }
 
+    public StudentController(IssueBook issueBook) {
+        this.issueBook = issueBook;
+        studentDAO = new StudentDAO();
+    }
+    
     public List<Student> getAllStudents() {
         return studentDAO.findAllStudents();
     }
@@ -37,7 +44,7 @@ public class StudentController {
         return isAdded;
     }
 
-    public boolean deleteStudent(String studentId) {
+    public boolean deleteStudent(int studentId) {
         if (studentDAO.deleteById(studentId)) {
             return true;
         }
@@ -51,7 +58,7 @@ public class StudentController {
         return false;
     }
     
-    public Student getStudentById(String studentId) {
+    public Student getStudentById(int studentId) {
         return studentDAO.findById(studentId);
     }
     

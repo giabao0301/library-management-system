@@ -16,7 +16,7 @@ import javax.swing.JOptionPane;
 
 /**
  *
- * @author lethi
+ * @author trinh
  */
 public class ViewAllRecord extends javax.swing.JFrame {
 

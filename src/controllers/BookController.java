@@ -1,8 +1,9 @@
 package controllers;
 
 import java.util.List;
-import models.Book;
-import models.BookDAO;
+import models.Book.Book;
+import models.Book.BookDAO;
+import views.IssueBook;
 import views.ManageBooks;
 
 /*
@@ -16,10 +17,16 @@ import views.ManageBooks;
 public class BookController {
 
     private ManageBooks manageBooks;
+    private IssueBook issueBook;
     private BookDAO bookDAO;
 
     public BookController(ManageBooks manageBooks) {
         this.manageBooks = manageBooks;
+        bookDAO = new BookDAO();
+    }
+    
+    public BookController(IssueBook issueBook) {
+        this.issueBook = issueBook;
         bookDAO = new BookDAO();
     }
 
@@ -59,7 +66,7 @@ public class BookController {
         return bookDAO.findAllCategories();
     }
     
-    public List<Book> getAllByCategory(String category) {
-        return bookDAO.findAllByCategory(category);
+    public List<Book> getAllByCategory(String genre) {
+        return bookDAO.findAllByGenre(genre);
     }
 }

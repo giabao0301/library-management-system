@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package models;
+package models.User;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,7 +26,7 @@ public class UserDAO {
     public boolean addUser(User user) {
         try {
             Connection connect = DBConnection.getConnection();
-            String sql = "insert into users(name, password, email, phone) values(?, ?, ?, ?)";
+            String sql = "insert into user(name, password, email, phone) values(?, ?, ?, ?)";
             PreparedStatement pst = connect.prepareStatement(sql);
 
             pst.setString(1, user.getName());
@@ -55,7 +55,7 @@ public class UserDAO {
 
         try {
             Connection connect = DBConnection.getConnection();
-            String sql = "select * from users where name = ?";
+            String sql = "select * from user where name = ?";
             PreparedStatement pst = connect.prepareStatement(sql);
 
             pst.setString(1, userName);

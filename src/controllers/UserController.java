@@ -4,9 +4,8 @@
  */
 package controllers;
 
-import models.User;
-import models.UserDAO;
-import views.HomePage;
+import models.User.User;
+import models.User.UserDAO;
 import views.LoginForm;
 import views.SignupForm;
 

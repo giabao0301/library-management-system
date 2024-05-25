@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import models.User;
+import models.User.User;
 
 public class SignupForm extends javax.swing.JFrame {
 

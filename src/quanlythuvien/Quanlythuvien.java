@@ -4,6 +4,8 @@
  */
 package quanlythuvien;
 
+import views.SignupForm;
+
 /**
  *
  * @author trinh
@@ -14,7 +16,9 @@ public class Quanlythuvien {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        SignupForm signupForm = new SignupForm();
+        
+        signupForm.setVisible(true);
     }
     
 }

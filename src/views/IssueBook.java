@@ -4,17 +4,34 @@
  */
 package views;
 
+import app.bolivia.swing.JCTextField;
+import controllers.BookController;
+import controllers.IssueController;
+import controllers.StudentController;
+import java.awt.Color;
 import utils.DBConnection;
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Calendar;
 import javax.swing.JFrame;
 import java.util.Date;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.border.LineBorder;
+import models.Book.Book;
+import models.Student.Student;
 
 /**
  *
- * @author lethi
+ * @author trinh
  */
 public class IssueBook extends javax.swing.JFrame {
+
+    private StudentController studentController;
+    private BookController bookController;
+    private IssueController issueController;
 
     /**
      * Creates new form IsssueBook
@@ -22,158 +39,99 @@ public class IssueBook extends javax.swing.JFrame {
     public IssueBook() {
         initComponents();
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        studentController = new StudentController(this);
+        bookController = new BookController(this);
+        issueController = new IssueController(this);
+        setMajorsToComboBox();
+        setDate();
     }
 
-    public void getBookDetails() {
-        String bookId = txt_bookId.getText();
-
-        try {
-            Connection con = DBConnection.getConnection();
-            PreparedStatement pst = con.prepareStatement("select * from book_details where bookID = ?");
-            pst.setString(1, bookId);
-            ResultSet rs = pst.executeQuery();
-
-            if (rs.next()) {
-                lbl_bookId.setText(rs.getString("bookID"));
-                lbl_bookName.setText(rs.getString("bookName"));
-                lbl_category.setText(rs.getString("category"));
-                lbl_author.setText(rs.getString("author"));
-                lbl_publisher.setText(rs.getString("publisher"));
-                lbl_quantity.setText(rs.getString("quantity"));
-                lbl_bookError.setText("");
-            } else {
-                lbl_bookError.setText("Sách không tồn tại");
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+    public void setMajorsToComboBox() {
+        for (String major : studentController.getAllMajors()) {
+            comboBoxMajor.addItem(major);
         }
     }
 
-    public void getStudentDetails() {
-        String studentId = txt_studentId.getText();
+    public void setDate() {
+        date_issueDate.setFormatoFecha("dd/MM/yyyy");
+        date_dueDate.setFormatoFecha("dd/MM/yyyy");
 
-        try {
-            Connection con = DBConnection.getConnection();
-            PreparedStatement pst = con.prepareStatement("select * from student_details where studentID = ?");
-            pst.setString(1, studentId);
-            ResultSet rs = pst.executeQuery();
+        date_issueDate.setDatoFecha(new Date());
 
-            if (rs.next()) {
-                lbl_studentId.setText(rs.getString("studentID"));
-                lbl_studentName.setText(rs.getString("studentName"));
-                lbl_email.setText(rs.getString("studentEmail"));
-                lbl_major.setSelectedItem(rs.getString("major"));
-                lbl_studentError.setText("");
-            } else {
-                lbl_studentError.setText("Sinh viên không tồn tại");
-            }
+        Date currentDate = new Date();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentDate);
+        calendar.add(Calendar.DAY_OF_YEAR, 90);
+
+        Date newDate = calendar.getTime();
+
+        date_dueDate.setDatoFecha(newDate);
+
     }
 
-//    insert isssue book details to db
-    public boolean issueBook() {
-        boolean isIssued = false;
-        String bookId = txt_bookId.getText();
-        String studentId = txt_studentId.getText();
-        String bookName = lbl_bookName.getText();
-        String studentName = lbl_studentName.getText();
-
-        Date uIssueDate = date_issueDate.getDatoFecha();
-        Date uDueDate = date_dueDate.getDatoFecha();
-
-        long l1 = uIssueDate.getTime();
-        long l2 = uDueDate.getTime();
-
-        if (l1 > l2) {
-            JOptionPane.showMessageDialog(this, "Ngày trả sách phải sau ngày mượn sách");
+    public boolean validateUserInput() {
+        if (txt_studentId.getText().equals("")) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập mã sinh viên");
             return false;
         }
 
-        java.sql.Date sIssueDate = new java.sql.Date(l1);
-        java.sql.Date sDueDate = new java.sql.Date(l2);
-
         try {
-            Connection con = DBConnection.getConnection();
-            String sql = "insert into issue_book_details(bookID, bookName, studentID, studentName, issueDate, dueDate, status)"
-                    + "values(?,?,?,?,?,?,?)";
-            PreparedStatement pst = con.prepareStatement(sql);
-            pst.setString(1, bookId);
-            pst.setString(2, bookName);
-            pst.setString(3, studentId);
-            pst.setString(4, studentName);
-            pst.setDate(5, sIssueDate);
-            pst.setDate(6, sDueDate);
-            pst.setString(7, "Đang mượn");
-
-            int rowCount = pst.executeUpdate();
-            if (rowCount > 0) {
-                isIssued = true;
+            int id = Integer.parseInt(txt_studentId.getText());
+            Student student = studentController.getStudentById(id);
+            if (student != null) {
+                lbl_studentId.setText(String.valueOf(student.getId()));
+                lbl_studentName.setText(student.getName());
+                lbl_email.setText(student.getEmail());
+                comboBoxMajor.setSelectedItem(student.getMajor());
             } else {
-                isIssued = false;
+                JOptionPane.showMessageDialog(this, "Sinh viên không tồn tại");
+                return false;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Mã sinh viên không hợp lệ");
+            return false;
         }
 
-        return isIssued;
-    }
-
-//    update book quantity
-    public void updateBookQuantity() {
-        String bookId = txt_bookId.getText();
-        try {
-            Connection con = DBConnection.getConnection();
-            String sql = "update book_details set quantity = quantity - 1 where bookId = ?";
-            PreparedStatement pst = con.prepareStatement(sql);
-            pst.setString(1, bookId);
-
-            int rowCount = pst.executeUpdate();
-
-            if (rowCount > 0) {
-                JOptionPane.showMessageDialog(this, "Cập nhật số lượng sách thành công");
-                int initialCount = Integer.parseInt(lbl_quantity.getText());
-
-                lbl_quantity.setText(Integer.toString(initialCount - 1));
-            } else {
-                JOptionPane.showMessageDialog(this, "Cập nhật số lượng sách không thành công");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (txt_bookId.getText().equals("")) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập mã sách");
+            return false;
         }
+
+        Book book = bookController.getBookById(txt_bookId.getText());
+        if (book != null) {
+            lbl_bookId.setText(book.getId());
+            lbl_bookName.setText(book.getTitle());
+            lbl_author.setText(book.getAuthor());
+            lbl_category.setText(book.getGenre());
+            lbl_publisher.setText(book.getPublisher());
+            lbl_quantity.setText(String.valueOf(book.getQuantity()));
+        } else {
+            JOptionPane.showMessageDialog(this, "Sách không tồn tại");
+        }
+
+        if (isAlreadyIssued()) {
+            JOptionPane.showMessageDialog(this, "Bạn đã mượn quyển sách này");
+            return false;
+        }
+
+        if (Integer.parseInt(lbl_quantity.getText()) == 0) {
+            JOptionPane.showMessageDialog(this, "Sách này tạm thời hết");
+            return false;
+        }
+        return true;
     }
 
 //    Check if a book is already issued by a student
     public boolean isAlreadyIssued() {
-        boolean isAlreadyIssued = false;
-
         String bookId = txt_bookId.getText();
-        String studentId = txt_studentId.getText();
+        int studentId = Integer.parseInt(txt_studentId.getText());
 
-        try {
-            Connection con = DBConnection.getConnection();
-            String sql = "select * from issue_book_details where bookID = ? and studentID = ? and status = ?";
-            PreparedStatement pst = con.prepareStatement(sql);
-            pst.setString(1, bookId);
-            pst.setString(2, studentId);
-            pst.setString(3, "Đang mượn");
-
-            ResultSet rs = pst.executeQuery();
-
-            if (rs.next()) {
-                isAlreadyIssued = true;
-            } else {
-                isAlreadyIssued = false;
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (issueController.getByBookIdAndStudentId(bookId, studentId) != null) {
+            return true;
         }
 
-        return isAlreadyIssued;
+        return false;
     }
 
     /**
@@ -194,10 +152,11 @@ public class IssueBook extends javax.swing.JFrame {
         lbl_studentName = new app.bolivia.swing.JCTextField();
         jLabel6 = new javax.swing.JLabel();
         lbl_email = new app.bolivia.swing.JCTextField();
-        jLabel2 = new javax.swing.JLabel();
-        lbl_major = new javax.swing.JComboBox<>();
         jLabel8 = new javax.swing.JLabel();
-        lbl_studentError = new javax.swing.JLabel();
+        comboBoxMajor = new javax.swing.JComboBox<>();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel11 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
         txt_bookId = new app.bolivia.swing.JCTextField();
         txt_studentId = new app.bolivia.swing.JCTextField();
@@ -206,7 +165,9 @@ public class IssueBook extends javax.swing.JFrame {
         date_dueDate = new rojeru_san.componentes.RSDateChooser();
         jLabel17 = new javax.swing.JLabel();
         jLabel18 = new javax.swing.JLabel();
-        rSMaterialButtonRectangle1 = new rojerusan.RSMaterialButtonRectangle();
+        submitButton = new rojerusan.RSMaterialButtonRectangle();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         jLabel20 = new javax.swing.JLabel();
@@ -217,16 +178,13 @@ public class IssueBook extends javax.swing.JFrame {
         lbl_author = new app.bolivia.swing.JCTextField();
         lbl_publisher = new app.bolivia.swing.JCTextField();
         jLabel23 = new javax.swing.JLabel();
-        lbl_bookError1 = new javax.swing.JLabel();
-        jLabel19 = new javax.swing.JLabel();
-        lbl_bookError = new javax.swing.JLabel();
-        lbl_quantity = new app.bolivia.swing.JCTextField();
         jLabel24 = new javax.swing.JLabel();
         lbl_category = new app.bolivia.swing.JCTextField();
-        jPanel4 = new javax.swing.JPanel();
-        jLabel11 = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
+        jLabel25 = new javax.swing.JLabel();
+        lbl_quantity = new app.bolivia.swing.JCTextField();
+        lbl_bookError = new javax.swing.JLabel();
+        lbl_studetntError = new javax.swing.JLabel();
+        checkButton = new rojerusan.RSMaterialButtonRectangle();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(255, 255, 255));
@@ -241,69 +199,79 @@ public class IssueBook extends javax.swing.JFrame {
         jLabel9.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
         jLabel9.setForeground(new java.awt.Color(255, 255, 255));
         jLabel9.setText("MSSV");
-        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 130, 120, -1));
+        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 70, 120, -1));
 
         lbl_studentId.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
-        lbl_studentId.setPlaceholder("Nhập mã số sinh viên");
         lbl_studentId.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 lbl_studentIdActionPerformed(evt);
             }
         });
-        jPanel1.add(lbl_studentId, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 160, 340, 40));
+        jPanel1.add(lbl_studentId, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 100, 340, 40));
 
         jLabel7.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(255, 255, 255));
         jLabel7.setText("Họ và tên");
-        jPanel1.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 230, 150, -1));
+        jPanel1.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 170, 150, -1));
 
         lbl_studentName.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
-        lbl_studentName.setPlaceholder("Nhập họ và tên sinh viên");
         lbl_studentName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 lbl_studentNameActionPerformed(evt);
             }
         });
-        jPanel1.add(lbl_studentName, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 260, 340, 40));
+        jPanel1.add(lbl_studentName, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 200, 340, 40));
 
         jLabel6.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel6.setText("Địa chỉ email");
-        jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 330, 190, -1));
+        jLabel6.setText("Email");
+        jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 260, 190, -1));
 
         lbl_email.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
-        lbl_email.setPlaceholder("Nhập email");
         lbl_email.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 lbl_emailActionPerformed(evt);
             }
         });
-        jPanel1.add(lbl_email, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 360, 340, 40));
-
-        jLabel2.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel2.setText("Chuyên ngành");
-        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 430, 200, -1));
-
-        lbl_major.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        lbl_major.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "CNTT", "HTTT", "KHMT", " " }));
-        jPanel1.add(lbl_major, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 460, 340, 40));
+        jPanel1.add(lbl_email, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 300, 340, 40));
 
         jLabel8.setFont(new java.awt.Font("Montserrat", 1, 24)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(255, 255, 255));
         jLabel8.setText("Thông tin sinh viên");
-        jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 60, -1, -1));
+        jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 10, -1, -1));
 
-        lbl_studentError.setFont(new java.awt.Font("Montserrat SemiBold", 0, 24)); // NOI18N
-        lbl_studentError.setForeground(new java.awt.Color(255, 51, 51));
-        jPanel1.add(lbl_studentError, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 550, 340, 60));
+        comboBoxMajor.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        comboBoxMajor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comboBoxMajorActionPerformed(evt);
+            }
+        });
+        jPanel1.add(comboBoxMajor, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 410, 340, 40));
 
-        panel_main.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 0, 440, 800));
+        jPanel4.setBackground(new java.awt.Color(255, 255, 255));
+
+        jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/AddNewBookIcons/51516_arrow_back_left_icon.png"))); // NOI18N
+        jLabel11.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jLabel11.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel11MouseClicked(evt);
+            }
+        });
+        jPanel4.add(jLabel11);
+
+        jPanel1.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 60, 40));
+
+        jLabel2.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel2.setText("Khoa");
+        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 370, 200, -1));
+
+        panel_main.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 440, 800));
 
         jLabel15.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
         jLabel15.setForeground(new java.awt.Color(0, 153, 204));
         jLabel15.setText("Mã sách");
-        panel_main.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 250, 80, -1));
+        panel_main.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(970, 330, 80, -1));
 
         txt_bookId.setBorder(javax.swing.BorderFactory.createEtchedBorder(new java.awt.Color(0, 112, 192), null));
         txt_bookId.setForeground(new java.awt.Color(102, 102, 102));
@@ -320,7 +288,7 @@ public class IssueBook extends javax.swing.JFrame {
                 txt_bookIdActionPerformed(evt);
             }
         });
-        panel_main.add(txt_bookId, new org.netbeans.lib.awtextra.AbsoluteConstraints(1140, 240, 250, 40));
+        panel_main.add(txt_bookId, new org.netbeans.lib.awtextra.AbsoluteConstraints(1140, 320, 240, 40));
 
         txt_studentId.setBorder(javax.swing.BorderFactory.createEtchedBorder(new java.awt.Color(0, 112, 192), null));
         txt_studentId.setForeground(new java.awt.Color(102, 102, 102));
@@ -337,18 +305,20 @@ public class IssueBook extends javax.swing.JFrame {
                 txt_studentIdActionPerformed(evt);
             }
         });
-        panel_main.add(txt_studentId, new org.netbeans.lib.awtextra.AbsoluteConstraints(1140, 310, 250, 40));
+        panel_main.add(txt_studentId, new org.netbeans.lib.awtextra.AbsoluteConstraints(1140, 220, 240, 40));
 
         jLabel16.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
         jLabel16.setForeground(new java.awt.Color(0, 153, 204));
         jLabel16.setText("Ngày trả");
-        panel_main.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 540, 90, -1));
+        panel_main.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(1010, 540, 90, -1));
 
+        date_issueDate.setEnabled(false);
         date_issueDate.setFont(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
         date_issueDate.setFuente(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
         date_issueDate.setPlaceholder("Chọn ngày mượn");
         panel_main.add(date_issueDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(1140, 460, 250, -1));
 
+        date_dueDate.setEnabled(false);
         date_dueDate.setFont(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
         date_dueDate.setFuente(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
         date_dueDate.setPlaceholder("Chọn ngày trả");
@@ -357,137 +327,23 @@ public class IssueBook extends javax.swing.JFrame {
         jLabel17.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
         jLabel17.setForeground(new java.awt.Color(0, 153, 204));
         jLabel17.setText("Mã sinh viên");
-        panel_main.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 320, 120, -1));
+        panel_main.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(970, 230, 120, -1));
 
         jLabel18.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
         jLabel18.setForeground(new java.awt.Color(0, 153, 204));
         jLabel18.setText("Ngày mượn");
         panel_main.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 470, 120, -1));
 
-        rSMaterialButtonRectangle1.setBackground(new java.awt.Color(100, 136, 234));
-        rSMaterialButtonRectangle1.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
-        rSMaterialButtonRectangle1.setLabel("Hoàn tất");
-        rSMaterialButtonRectangle1.addActionListener(new java.awt.event.ActionListener() {
+        submitButton.setBackground(new java.awt.Color(100, 136, 234));
+        submitButton.setText("Cho mượn");
+        submitButton.setEnabled(false);
+        submitButton.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        submitButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                rSMaterialButtonRectangle1ActionPerformed(evt);
+                submitButtonActionPerformed(evt);
             }
         });
-        panel_main.add(rSMaterialButtonRectangle1, new org.netbeans.lib.awtextra.AbsoluteConstraints(1120, 640, 210, -1));
-
-        jPanel3.setBackground(new java.awt.Color(100, 136, 234));
-        jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel4.setFont(new java.awt.Font("Montserrat", 1, 24)); // NOI18N
-        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel4.setText("Thông tin sách");
-        jPanel3.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 60, -1, -1));
-
-        jLabel20.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
-        jLabel20.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel20.setText("Mã sách");
-        jPanel3.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 130, 150, -1));
-
-        lbl_bookId.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
-        lbl_bookId.setPlaceholder("Nhập mã sách");
-        lbl_bookId.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lbl_bookIdActionPerformed(evt);
-            }
-        });
-        jPanel3.add(lbl_bookId, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 160, 360, 40));
-
-        jLabel21.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
-        jLabel21.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel21.setText("Tên sách");
-        jPanel3.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 230, 150, -1));
-
-        lbl_bookName.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
-        lbl_bookName.setPlaceholder("Nhập tên sách");
-        lbl_bookName.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lbl_bookNameActionPerformed(evt);
-            }
-        });
-        jPanel3.add(lbl_bookName, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 260, 360, 40));
-
-        jLabel22.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
-        jLabel22.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel22.setText("Tác giả");
-        jPanel3.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 330, 140, -1));
-
-        lbl_author.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
-        lbl_author.setPlaceholder("Nhập tác giả");
-        lbl_author.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lbl_authorActionPerformed(evt);
-            }
-        });
-        jPanel3.add(lbl_author, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 360, 360, 40));
-
-        lbl_publisher.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
-        lbl_publisher.setPlaceholder("Nhập nhà xuất bản");
-        lbl_publisher.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lbl_publisherActionPerformed(evt);
-            }
-        });
-        jPanel3.add(lbl_publisher, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 540, 360, 40));
-
-        jLabel23.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
-        jLabel23.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel23.setText("Nhà xuất bản");
-        jPanel3.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 510, 150, -1));
-
-        lbl_bookError1.setFont(new java.awt.Font("Montserrat SemiBold", 0, 24)); // NOI18N
-        lbl_bookError1.setForeground(new java.awt.Color(255, 51, 51));
-        jPanel3.add(lbl_bookError1, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 700, 360, 60));
-
-        jLabel19.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
-        jLabel19.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel19.setText("Số lượng");
-        jPanel3.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 600, 150, -1));
-
-        lbl_bookError.setFont(new java.awt.Font("Montserrat SemiBold", 0, 24)); // NOI18N
-        lbl_bookError.setForeground(new java.awt.Color(255, 51, 51));
-        jPanel3.add(lbl_bookError, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 670, 360, 60));
-
-        lbl_quantity.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
-        lbl_quantity.setPlaceholder("Nhập số lượng");
-        lbl_quantity.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lbl_quantityActionPerformed(evt);
-            }
-        });
-        jPanel3.add(lbl_quantity, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 630, 360, 40));
-
-        jLabel24.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
-        jLabel24.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel24.setText("Thể loại");
-        jPanel3.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 420, 150, -1));
-
-        lbl_category.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
-        lbl_category.setPlaceholder("Nhập thể loại");
-        lbl_category.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lbl_categoryActionPerformed(evt);
-            }
-        });
-        jPanel3.add(lbl_category, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 450, 360, 40));
-
-        jPanel4.setBackground(new java.awt.Color(255, 255, 255));
-
-        jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/AddNewBookIcons/51516_arrow_back_left_icon.png"))); // NOI18N
-        jLabel11.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jLabel11.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jLabel11MouseClicked(evt);
-            }
-        });
-        jPanel4.add(jLabel11);
-
-        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 50, 40));
-
-        panel_main.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 440, 800));
+        panel_main.add(submitButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(1100, 700, 210, -1));
 
         jPanel2.setBackground(new java.awt.Color(51, 102, 255));
         jPanel2.setForeground(new java.awt.Color(255, 255, 255));
@@ -497,17 +353,117 @@ public class IssueBook extends javax.swing.JFrame {
         jLabel3.setText("Mượn sách");
         jPanel2.add(jLabel3);
 
-        panel_main.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(1030, 110, 350, 50));
+        panel_main.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(1020, 110, 350, 50));
+
+        jPanel3.setBackground(new java.awt.Color(100, 136, 234));
+        jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel4.setFont(new java.awt.Font("Montserrat", 1, 24)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel4.setText("Thông tin sách");
+        jPanel3.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 20, -1, -1));
+
+        jLabel20.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel20.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel20.setText("Mã sách");
+        jPanel3.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 70, 150, -1));
+
+        lbl_bookId.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
+        lbl_bookId.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lbl_bookIdActionPerformed(evt);
+            }
+        });
+        jPanel3.add(lbl_bookId, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 100, 360, 40));
+
+        jLabel21.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel21.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel21.setText("Tên sách");
+        jPanel3.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 160, 150, -1));
+
+        lbl_bookName.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
+        lbl_bookName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lbl_bookNameActionPerformed(evt);
+            }
+        });
+        jPanel3.add(lbl_bookName, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 190, 360, 40));
+
+        jLabel22.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel22.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel22.setText("Tác giả");
+        jPanel3.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 260, 140, -1));
+
+        lbl_author.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
+        lbl_author.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lbl_authorActionPerformed(evt);
+            }
+        });
+        jPanel3.add(lbl_author, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 290, 360, 40));
+
+        lbl_publisher.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
+        lbl_publisher.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lbl_publisherActionPerformed(evt);
+            }
+        });
+        jPanel3.add(lbl_publisher, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 490, 360, 40));
+
+        jLabel23.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel23.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel23.setText("Nhà xuất bản");
+        jPanel3.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 460, 150, -1));
+
+        jLabel24.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel24.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel24.setText("Thể loại");
+        jPanel3.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 360, 150, -1));
+
+        lbl_category.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
+        lbl_category.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lbl_categoryActionPerformed(evt);
+            }
+        });
+        jPanel3.add(lbl_category, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 390, 360, 40));
+
+        jLabel25.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        jLabel25.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel25.setText("Số lượng");
+        jPanel3.add(jLabel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 560, 150, -1));
+
+        lbl_quantity.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
+        lbl_quantity.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lbl_quantityActionPerformed(evt);
+            }
+        });
+        jPanel3.add(lbl_quantity, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 590, 360, 40));
+
+        panel_main.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 0, 440, 800));
+
+        lbl_bookError.setForeground(new java.awt.Color(255, 0, 0));
+        panel_main.add(lbl_bookError, new org.netbeans.lib.awtextra.AbsoluteConstraints(1140, 290, 240, 20));
+
+        lbl_studetntError.setForeground(new java.awt.Color(255, 0, 0));
+        panel_main.add(lbl_studetntError, new org.netbeans.lib.awtextra.AbsoluteConstraints(1140, 190, 240, 20));
+
+        checkButton.setBackground(new java.awt.Color(100, 136, 234));
+        checkButton.setText("Kiểm tra");
+        checkButton.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
+        checkButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkButtonActionPerformed(evt);
+            }
+        });
+        panel_main.add(checkButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(1100, 620, 210, -1));
 
         getContentPane().add(panel_main, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1410, 800));
 
         setSize(new java.awt.Dimension(1425, 810));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
-
-    private void lbl_quantityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lbl_quantityActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_lbl_quantityActionPerformed
 
     private void lbl_studentIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lbl_studentIdActionPerformed
         // TODO add your handling code here:
@@ -529,34 +485,12 @@ public class IssueBook extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txt_studentIdActionPerformed
 
-    private void rSMaterialButtonRectangle1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rSMaterialButtonRectangle1ActionPerformed
-        if (lbl_quantity.getText().equals("0")) {
-            JOptionPane.showMessageDialog(this, "Sách này tạm hết vui lòng chọn sách khác");
-        } else {
-
-            if (isAlreadyIssued() == false) {
-                if (issueBook() == true) {
-                    JOptionPane.showMessageDialog(this, "Mượn sách thành công");
-                    updateBookQuantity();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Mượn sách không thành công");
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, "Sinh viên đã mượn quyển sách này");
-            }
-        }
-    }//GEN-LAST:event_rSMaterialButtonRectangle1ActionPerformed
-
     private void txt_bookIdFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txt_bookIdFocusLost
-        if (!txt_bookId.getText().equals("")) {
-            getBookDetails();
-        }
+
     }//GEN-LAST:event_txt_bookIdFocusLost
 
     private void txt_studentIdFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txt_studentIdFocusLost
-        if (!txt_studentId.getText().equals("")) {
-            getStudentDetails();
-        }
+
     }//GEN-LAST:event_txt_studentIdFocusLost
 
     private void jLabel11MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel11MouseClicked
@@ -584,6 +518,32 @@ public class IssueBook extends javax.swing.JFrame {
     private void lbl_categoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lbl_categoryActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_lbl_categoryActionPerformed
+
+    private void comboBoxMajorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboBoxMajorActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_comboBoxMajorActionPerformed
+
+    private void lbl_quantityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lbl_quantityActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_lbl_quantityActionPerformed
+
+    private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
+        Book book = new Book(lbl_bookId.getText(), lbl_bookName.getText());
+
+        Student student = new Student(Integer.parseInt(lbl_studentId.getText()), lbl_studentName.getText());
+
+        if (issueController.issueBook(book, student, date_issueDate.getDatoFecha(), date_dueDate.getDatoFecha())) {
+            JOptionPane.showMessageDialog(this, "Mượn sách thành công");
+        } else {
+            JOptionPane.showMessageDialog(this, "Mượn sách không thành công");
+        }
+    }//GEN-LAST:event_submitButtonActionPerformed
+
+    private void checkButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkButtonActionPerformed
+        if (validateUserInput()) {
+            submitButton.setEnabled(true);
+        }
+    }//GEN-LAST:event_checkButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -622,6 +582,8 @@ public class IssueBook extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private rojerusan.RSMaterialButtonRectangle checkButton;
+    private javax.swing.JComboBox<String> comboBoxMajor;
     private rojeru_san.componentes.RSDateChooser date_dueDate;
     private rojeru_san.componentes.RSDateChooser date_issueDate;
     private javax.swing.JLabel jLabel11;
@@ -629,13 +591,13 @@ public class IssueBook extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;
@@ -648,20 +610,18 @@ public class IssueBook extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel4;
     private app.bolivia.swing.JCTextField lbl_author;
     private javax.swing.JLabel lbl_bookError;
-    private javax.swing.JLabel lbl_bookError1;
     private app.bolivia.swing.JCTextField lbl_bookId;
     private app.bolivia.swing.JCTextField lbl_bookName;
     private app.bolivia.swing.JCTextField lbl_category;
     private app.bolivia.swing.JCTextField lbl_email;
-    private javax.swing.JComboBox<String> lbl_major;
     private app.bolivia.swing.JCTextField lbl_publisher;
     private app.bolivia.swing.JCTextField lbl_quantity;
-    private javax.swing.JLabel lbl_studentError;
     private app.bolivia.swing.JCTextField lbl_studentId;
     private app.bolivia.swing.JCTextField lbl_studentName;
+    private javax.swing.JLabel lbl_studetntError;
     private javax.swing.JPanel panel_main;
     private rojeru_san.componentes.RSDateChooserBeanInfo rSDateChooserBeanInfo1;
-    private rojerusan.RSMaterialButtonRectangle rSMaterialButtonRectangle1;
+    private rojerusan.RSMaterialButtonRectangle submitButton;
     private app.bolivia.swing.JCTextField txt_bookId;
     private app.bolivia.swing.JCTextField txt_studentId;
     // End of variables declaration//GEN-END:variables

@@ -10,7 +10,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.table.TableRowSorter;
-import models.Student;
+import models.Student.Student;
 
 /**
  *
@@ -48,17 +48,17 @@ public class ManageStudents extends javax.swing.JFrame {
     public void setStudentDetailsToTable(List<Student> students) {
         clearTable();
         for (Student student : students) {
-            String studentID = student.getId();
-            String studentName = student.getName();
+            int id = student.getId();
+            String name = student.getName();
             String gender = student.getGender();
             LocalDate birthday = student.getBirthday();
-            String studentEmail = student.getEmail();
+            String email = student.getEmail();
             String major = student.getMajor();
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             String formattedBirthday = formatter.format(birthday);
 
-            Object[] obj = {studentID, studentName, gender, formattedBirthday, studentEmail, major};
+            Object[] obj = {id, name, gender, formattedBirthday, email, major};
             model = (DefaultTableModel) tbl_studentDetails.getModel();
             model.addRow(obj);
         }
@@ -67,20 +67,21 @@ public class ManageStudents extends javax.swing.JFrame {
     public void setMajorsToComboBox() {
         for (String major : studentController.getAllMajors()) {
             comboBoxMajor.addItem(major);
+            comboMajor.addItem(major);
         }
     }
     
     public Student getUserInput() {
-        String studentID = txtStudentID.getText();
-        String studentName = txtStudentName.getText();
+        int id = Integer.parseInt(txtStudentID.getText());
+        String name = txtStudentName.getText();
         String gender = txtGender.getText();
         String birthday = txtBirthday.getText();
-        String studentEmail = txtStudentEmail.getText();
+        String email = txtStudentEmail.getText();
         String major = comboMajor.getSelectedItem().toString();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate formattedBirthday = LocalDate.parse(birthday, formatter);
-        return new Student(studentID, studentName, gender, formattedBirthday, studentEmail, major);
+        return new Student(id, name, gender, formattedBirthday, email, major);
     }
 
     public void refreshTable() {
@@ -92,7 +93,7 @@ public class ManageStudents extends javax.swing.JFrame {
     public boolean validateUserInput() {
         Student student = getUserInput();
 
-        if (student.getId().equals("")) {
+        if (String.valueOf(student.getId()).equals("")) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập mã sinh viên");
             return false;
         }
@@ -115,7 +116,7 @@ public class ManageStudents extends javax.swing.JFrame {
             return false;
         }
         if (student.getMajor().equals("")) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập chuyên ngành");
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập khoa");
             return false;
         }
 
@@ -123,7 +124,7 @@ public class ManageStudents extends javax.swing.JFrame {
     }
 
     public void displayStudentDetails(Student student) {
-        txtStudentID.setText(student.getId());
+        txtStudentID.setText(String.valueOf(student.getId()));
         txtStudentName.setText(student.getName());
         txtGender.setText(student.getGender());
         txtBirthday.setText(student.getBirthday().toString());
@@ -235,7 +236,7 @@ public class ManageStudents extends javax.swing.JFrame {
 
         jLabel2.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel2.setText("Chuyên ngành");
+        jLabel2.setText("Khoa");
         jPanel4.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 640, -1, -1));
 
         jLabel7.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
@@ -278,7 +279,7 @@ public class ManageStudents extends javax.swing.JFrame {
         jPanel4.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 550, -1, -1));
 
         txtBirthday.setFont(new java.awt.Font("Montserrat", 0, 18)); // NOI18N
-        txtBirthday.setPlaceholder("NN-TT-NNNN");
+        txtBirthday.setPlaceholder("NN/TT/NNNN");
         txtBirthday.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtBirthdayActionPerformed(evt);
@@ -296,7 +297,6 @@ public class ManageStudents extends javax.swing.JFrame {
         jPanel4.add(txtStudentEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 580, 280, 40));
 
         comboMajor.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        comboMajor.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "CNTT", "HTTT", "KHMT", " " }));
         comboMajor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 comboMajorActionPerformed(evt);
@@ -316,7 +316,7 @@ public class ManageStudents extends javax.swing.JFrame {
 
             },
             new String [] {
-                "MSSV", "Họ và tên", "Giới tính", "Ngày sinh", "Địa chỉ email", "Chuyên ngành"
+                "MSSV", "Họ và tên", "Giới tính", "Ngày sinh", "Địa chỉ email", "Khoa"
             }
         ));
         tbl_studentDetails.setColorBordeFilas(new java.awt.Color(255, 255, 255));
@@ -434,7 +434,7 @@ public class ManageStudents extends javax.swing.JFrame {
     }//GEN-LAST:event_backButtonMouseClicked
 
     private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchButtonActionPerformed
-        Student student = studentController.getStudentById(txtFindID.getText());
+        Student student = studentController.getStudentById(Integer.parseInt(txtFindID.getText()));
         if (student != null) {
             displayStudentDetails(student);
         } else {
@@ -465,7 +465,7 @@ public class ManageStudents extends javax.swing.JFrame {
     }// GEN-LAST:event_txtGenderActionPerformed
 
     private void btnXoaActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnXoaActionPerformed
-         if (studentController.deleteStudent(txtStudentID.getText())) {
+         if (studentController.deleteStudent(Integer.parseInt(txtStudentID.getText()))) {
             JOptionPane.showMessageDialog(this, "Xóa sinh viên thành công");
             refreshTable();
         } else {
