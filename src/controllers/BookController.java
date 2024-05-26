@@ -5,6 +5,7 @@ import models.Book.Book;
 import models.Book.BookDAO;
 import views.IssueBook;
 import views.ManageBooks;
+import views.ReturnBook;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -18,8 +19,10 @@ public class BookController {
 
     private ManageBooks manageBooks;
     private IssueBook issueBook;
+    private ReturnBook returnBook;
     private BookDAO bookDAO;
 
+    
     public BookController(ManageBooks manageBooks) {
         this.manageBooks = manageBooks;
         bookDAO = new BookDAO();
@@ -30,6 +33,11 @@ public class BookController {
         bookDAO = new BookDAO();
     }
 
+    public BookController(ReturnBook returnBook) {
+        this.returnBook = returnBook;
+        bookDAO = new BookDAO();
+    }
+    
     public List<Book> getAllBooks() {
         return bookDAO.findAllBooks();
     }
@@ -57,6 +65,7 @@ public class BookController {
         }
         return false;
     }
+    
     
     public Book getBookById(String bookId) {
        return bookDAO.findById(bookId);

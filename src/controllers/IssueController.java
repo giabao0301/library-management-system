@@ -10,6 +10,7 @@ import models.Issue.Issue;
 import models.Issue.IssueDAO;
 import models.Student.Student;
 import views.IssueBook;
+import views.ReturnBook;
 
 /**
  *
@@ -18,9 +19,18 @@ import views.IssueBook;
 public class IssueController {
     private IssueDAO issueDAO;
     private IssueBook issueBook;
+    private ReturnBook returnBook;
+
+    public IssueController() {
+    }
     
     public IssueController(IssueBook issueBook) {
         this.issueBook = issueBook;
+        issueDAO = new IssueDAO();
+    }
+    
+    public IssueController(ReturnBook returnBook) {
+        this.returnBook = returnBook;
         issueDAO = new IssueDAO();
     }
     
@@ -30,5 +40,9 @@ public class IssueController {
     
     public boolean issueBook(Book book, Student student, Date issueDate, Date dueDate) {
         return issueDAO.addIssue(book, student, issueDate, dueDate);
+    }
+    
+    public boolean returnBook(int issueId, String status) {
+        return issueDAO.updateById(issueId, status);
     }
 }

@@ -9,6 +9,7 @@ import models.Student.Student;
 import models.Student.StudentDAO;
 import views.IssueBook;
 import views.ManageStudents;
+import views.ReturnBook;
 
 /**
  *
@@ -19,6 +20,7 @@ public class StudentController {
     private ManageStudents manageStudents;
     private StudentDAO studentDAO;
     private IssueBook issueBook;
+    private ReturnBook returnBook;
     
     public StudentController(ManageStudents manageStudents) {
         this.manageStudents = manageStudents;
@@ -27,6 +29,11 @@ public class StudentController {
 
     public StudentController(IssueBook issueBook) {
         this.issueBook = issueBook;
+        studentDAO = new StudentDAO();
+    }
+    
+     public StudentController(ReturnBook returnBook) {
+        this.returnBook = returnBook;
         studentDAO = new StudentDAO();
     }
     

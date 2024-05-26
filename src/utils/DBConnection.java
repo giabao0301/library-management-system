@@ -19,7 +19,7 @@ public class DBConnection {
     public static Connection getConnection() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            connect = DriverManager.getConnection("jdbc:mysql://localhost:3306/lms", "root", "");
+            connect = DriverManager.getConnection("jdbc:mysql://localhost:3306/lms", "root", "123456");
         } catch (Exception e) {
             e.printStackTrace();
         }
