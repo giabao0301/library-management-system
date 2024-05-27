@@ -6,10 +6,12 @@ package models.Issue;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import models.Book.Book;
 import models.Student.Student;
 import utils.DBConnection;
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -79,7 +81,7 @@ public class IssueDAO {
             Connection con = DBConnection.getConnection();
             String sql = "update issue SET status = ?  where id = ?";
             PreparedStatement pst = con.prepareStatement(sql);
-            
+
             pst.setString(1, status);
             pst.setInt(2, issueId);
 
@@ -117,4 +119,146 @@ public class IssueDAO {
         return false;
     }
 
+    public List<Issue> findByStatus(String status) {
+        try {
+            Connection con = DBConnection.getConnection();
+
+            String sql = "select * from issue where status = ?";
+
+            PreparedStatement pst = con.prepareStatement(sql);
+
+            pst.setString(1, status);
+
+            ResultSet rs = pst.executeQuery();
+
+            List<Issue> issues = new ArrayList<>();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String bookId = rs.getString("book_id");
+                String bookName = rs.getString("book_name");
+                int studentId = rs.getInt("student_id");
+                String studentName = rs.getString("student_name");
+                LocalDate issueDate = rs.getDate("issue_date").toLocalDate();
+                LocalDate dueDate = rs.getDate("due_date").toLocalDate();
+
+                issues.add(new Issue(id, bookId, bookName, studentId, studentName, issueDate, dueDate, status));
+            }
+
+            return issues;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public List<Issue> findViolatedIssueByStudentId(int studentId) {
+        try {
+            Connection con = DBConnection.getConnection();
+
+            String sql = "select * from issue where student_id = ? and status in (?, ?)";
+
+            PreparedStatement pst = con.prepareStatement(sql);
+
+            pst.setInt(1, studentId);
+            pst.setString(2, "Quá hạn");
+            pst.setString(3, "Đã mất");
+
+            ResultSet rs = pst.executeQuery();
+
+            List<Issue> issues = new ArrayList<>();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String bookId = rs.getString("book_id");
+                String bookName = rs.getString("book_name");
+                String studentName = rs.getString("student_name");
+                LocalDate issueDate = rs.getDate("issue_date").toLocalDate();
+                LocalDate dueDate = rs.getDate("due_date").toLocalDate();
+                String status = rs.getString("status");
+
+                issues.add(new Issue(id, bookId, bookName, studentId, studentName, issueDate, dueDate, status));
+            }
+
+            return issues;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+    
+    public Issue findViolatedIssueByBookIdAndStudentId(String bookId, int studentId) {
+        try {
+            Connection con = DBConnection.getConnection();
+
+            String sql = "select * from issue where student_id = ? and book_id = ? and status in (?, ?)";
+
+            PreparedStatement pst = con.prepareStatement(sql);
+
+            pst.setInt(1, studentId);
+            pst.setString(2, bookId);
+            pst.setString(3, "Quá hạn");
+            pst.setString(4, "Đã mất");
+
+            ResultSet rs = pst.executeQuery();
+
+
+            if (rs.next()) {
+                int id = rs.getInt("id");
+                String bookName = rs.getString("book_name");
+                String studentName = rs.getString("student_name");
+                LocalDate issueDate = rs.getDate("issue_date").toLocalDate();
+                LocalDate dueDate = rs.getDate("due_date").toLocalDate();
+                String status = rs.getString("status");
+
+                return new Issue(id, bookId, bookName, studentId, studentName, issueDate, dueDate, status);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+    
+    public List<Issue> findAllViolatedIssue() {
+        try {
+            Connection con = DBConnection.getConnection();
+
+            String sql = "select * from issue where status in (?, ?)";
+
+            PreparedStatement pst = con.prepareStatement(sql);
+
+            pst.setString(1, "Quá hạn");
+            pst.setString(2, "Đã mất");
+
+            ResultSet rs = pst.executeQuery();
+
+            List<Issue> issues = new ArrayList<>();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String bookId = rs.getString("book_id");
+                String bookName = rs.getString("book_name");
+                int studentId = rs.getInt("student_id");
+                String studentName = rs.getString("student_name");
+                LocalDate issueDate = rs.getDate("issue_date").toLocalDate();
+                LocalDate dueDate = rs.getDate("due_date").toLocalDate();
+                String status = rs.getString("status");
+
+                issues.add(new Issue(id, bookId, bookName, studentId, studentName, issueDate, dueDate, status));
+            }
+
+            return issues;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }

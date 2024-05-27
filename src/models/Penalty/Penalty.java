@@ -18,9 +18,20 @@ public class Penalty {
     private String studentName;
     private int penaltyAmount;
     private LocalDate penaltyDate;
-    private String status;
 
-    public Penalty(int id, String bookId, String bookName, int studentId, String studentName, int penaltyAmount, LocalDate penaltyDate, String status) {
+
+    public Penalty(String bookId, String bookName, int studentId, String studentName, int penaltyAmount, LocalDate penaltyDate) {
+        this.bookId = bookId;
+        this.bookName = bookName;
+        this.studentId = studentId;
+        this.studentName = studentName;
+        this.penaltyAmount = penaltyAmount;
+        this.penaltyDate = penaltyDate;
+    }
+
+    
+    
+    public Penalty(int id, String bookId, String bookName, int studentId, String studentName, int penaltyAmount, LocalDate penaltyDate) {
         this.id = id;
         this.bookId = bookId;
         this.bookName = bookName;
@@ -28,7 +39,7 @@ public class Penalty {
         this.studentName = studentName;
         this.penaltyAmount = penaltyAmount;
         this.penaltyDate = penaltyDate;
-        this.status = status;
+    
     }
 
     public int getId() {
@@ -86,14 +97,4 @@ public class Penalty {
     public void setPenaltyDate(LocalDate penaltyDate) {
         this.penaltyDate = penaltyDate;
     }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-    
-    
 }

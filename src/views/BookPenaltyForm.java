@@ -4,6 +4,9 @@
  */
 package views;
 
+import controllers.BookController;
+import controllers.IssueController;
+import controllers.PenaltyController;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -11,27 +14,53 @@ import java.sql.Statement;
 import java.util.Date;
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.table.TableModel;
+import models.Book.Book;
+import models.Issue.Issue;
+import models.Penalty.Penalty;
 
 /**
  *
- * @author lethi
+ * @author trinh
  */
 public class BookPenaltyForm extends javax.swing.JFrame {
 
-    DefaultTableModel model;
+    private IssueController issueController;
+    private BookController bookController;
+    private DefaultTableModel model;
+    private PenaltyController penaltyController;
 
     /**
      * Creates new form IssueBookDetails
      */
     public BookPenaltyForm() {
         initComponents();
-        setIssueBookDetailsToTable();
-        importDataToCombobox(); // Populate the combobox
-        setBookPenaltyDetailsToTable();
+        issueController = new IssueController(this);
+        bookController = new BookController(this);
+        penaltyController = new PenaltyController(this);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
+        List<Issue> issues = issueController.getAllViolatedIssue();
+
+        setIssueDetailsToTable(issues);
+        setPenaltyDate();
+
+        List<Penalty> penalties = penaltyController.getAllPenalties();
+        setPenaltyDetailsToTable(penalties);
     }
 
     /**
@@ -46,23 +75,23 @@ public class BookPenaltyForm extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
-        jPanel4 = new javax.swing.JPanel();
+        backButton = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane5 = new javax.swing.JScrollPane();
         tbl_penalty = new rojeru_san.complementos.RSTableMetro();
-        label1 = new java.awt.Label();
-        label2 = new java.awt.Label();
-        label3 = new java.awt.Label();
-        label4 = new java.awt.Label();
-        txt_money = new java.awt.TextField();
-        studentCombobox = new javax.swing.JComboBox<>();
         btnTaoPhieu = new javax.swing.JButton();
-        txt_penaltyID = new java.awt.TextField();
-        jScrollPane6 = new javax.swing.JScrollPane();
-        tbl_issueBookDetails1 = new rojeru_san.complementos.RSTableMetro();
         btnLamMoi = new javax.swing.JButton();
-        date_collectDate = new rojeru_san.componentes.RSDateChooser();
+        checkButton = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        txt_studentId = new app.bolivia.swing.JCTextField();
+        txt_money = new app.bolivia.swing.JCTextField();
+        date_penaltyDate = new app.bolivia.swing.JCTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tbl_issueDetails = new rojeru_san.complementos.RSTableMetro();
+        showAllButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -74,7 +103,7 @@ public class BookPenaltyForm extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 36)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("Phiếu thu tiền phạt");
-        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 10, 320, 50));
+        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 20, 320, 50));
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -87,39 +116,39 @@ public class BookPenaltyForm extends javax.swing.JFrame {
             .addGap(0, 10, Short.MAX_VALUE)
         );
 
-        jPanel1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 70, 400, 10));
+        jPanel1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 80, 400, 10));
 
-        jPanel4.addMouseListener(new java.awt.event.MouseAdapter() {
+        backButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jPanel4MouseClicked(evt);
+                backButtonMouseClicked(evt);
             }
         });
 
         jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/AddNewBookIcons/51516_arrow_back_left_icon.png"))); // NOI18N
         jLabel9.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout backButtonLayout = new javax.swing.GroupLayout(backButton);
+        backButton.setLayout(backButtonLayout);
+        backButtonLayout.setHorizontalGroup(
+            backButtonLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 50, Short.MAX_VALUE)
-            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel4Layout.createSequentialGroup()
+            .addGroup(backButtonLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(backButtonLayout.createSequentialGroup()
                     .addGap(0, 0, Short.MAX_VALUE)
                     .addComponent(jLabel9)
                     .addGap(0, 0, Short.MAX_VALUE)))
         );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        backButtonLayout.setVerticalGroup(
+            backButtonLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 40, Short.MAX_VALUE)
-            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel4Layout.createSequentialGroup()
+            .addGroup(backButtonLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(backButtonLayout.createSequentialGroup()
                     .addGap(0, 0, Short.MAX_VALUE)
                     .addComponent(jLabel9)
                     .addGap(0, 0, Short.MAX_VALUE)))
         );
 
-        jPanel1.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 50, 40));
+        jPanel1.add(backButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 50, 40));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1920, 110));
 
@@ -130,92 +159,36 @@ public class BookPenaltyForm extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Mã phiếu", "Mã sinh viên", "Tổng tiền thu", "Ngày thu"
+                "Mã phiếu", "Mã sinh viên", "Tên sinh viên", "Tổng tiền thu", "Ngày thu"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                true, true, false, true, true
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         tbl_penalty.setColorBordeFilas(new java.awt.Color(255, 255, 255));
         tbl_penalty.setColorBordeHead(new java.awt.Color(255, 255, 255));
         tbl_penalty.setRowHeight(30);
         tbl_penalty.setShowGrid(false);
-        tbl_penalty.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tbl_penaltyMouseClicked(evt);
-            }
-        });
         jScrollPane5.setViewportView(tbl_penalty);
 
-        jPanel2.add(jScrollPane5, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 50, 740, 190));
+        jPanel2.add(jScrollPane5, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 50, 740, 190));
 
-        label1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
-        label1.setText("Mã phiếu");
-        jPanel2.add(label1, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 30, 120, 40));
-
-        label2.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
-        label2.setText("Mã sinh viên");
-        jPanel2.add(label2, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 90, 120, 40));
-
-        label3.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
-        label3.setText("Tổng tiền thu");
-        jPanel2.add(label3, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 220, 120, 40));
-
-        label4.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
-        label4.setText("Ngày thu");
-        jPanel2.add(label4, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 270, 120, 40));
-
-        txt_money.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
-        jPanel2.add(txt_money, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 220, 320, 40));
-
-        studentCombobox.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
-        studentCombobox.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
-            public void popupMenuCanceled(javax.swing.event.PopupMenuEvent evt) {
-            }
-            public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent evt) {
-            }
-            public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent evt) {
-                studentComboboxPopupMenuWillBecomeVisible(evt);
-            }
-        });
-        studentCombobox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                studentComboboxActionPerformed(evt);
-            }
-        });
-        jPanel2.add(studentCombobox, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 90, 320, 40));
-
-        btnTaoPhieu.setBackground(new java.awt.Color(102, 153, 255));
+        btnTaoPhieu.setBackground(new java.awt.Color(0, 255, 0));
         btnTaoPhieu.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
         btnTaoPhieu.setForeground(new java.awt.Color(255, 255, 255));
         btnTaoPhieu.setText("Tạo phiếu");
+        btnTaoPhieu.setEnabled(false);
         btnTaoPhieu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnTaoPhieuActionPerformed(evt);
             }
         });
-        jPanel2.add(btnTaoPhieu, new org.netbeans.lib.awtextra.AbsoluteConstraints(840, 260, 140, 50));
-
-        txt_penaltyID.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
-        jPanel2.add(txt_penaltyID, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 30, 320, 40));
-
-        tbl_issueBookDetails1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "Mã sách", "Tên sách", "Mã sinh viên", "Tên sinh viên", "Trạng thái"
-            }
-        ));
-        tbl_issueBookDetails1.setColorBordeFilas(new java.awt.Color(255, 255, 255));
-        tbl_issueBookDetails1.setColorBordeHead(new java.awt.Color(255, 255, 255));
-        tbl_issueBookDetails1.setRowHeight(30);
-        tbl_issueBookDetails1.setShowGrid(false);
-        tbl_issueBookDetails1.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tbl_issueBookDetails1MouseClicked(evt);
-            }
-        });
-        jScrollPane6.setViewportView(tbl_issueBookDetails1);
-
-        jPanel2.add(jScrollPane6, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 380, 1280, 270));
+        jPanel2.add(btnTaoPhieu, new org.netbeans.lib.awtextra.AbsoluteConstraints(880, 260, 140, 50));
 
         btnLamMoi.setBackground(new java.awt.Color(102, 153, 255));
         btnLamMoi.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
@@ -226,206 +199,268 @@ public class BookPenaltyForm extends javax.swing.JFrame {
                 btnLamMoiActionPerformed(evt);
             }
         });
-        jPanel2.add(btnLamMoi, new org.netbeans.lib.awtextra.AbsoluteConstraints(1030, 260, 140, 50));
+        jPanel2.add(btnLamMoi, new org.netbeans.lib.awtextra.AbsoluteConstraints(1060, 260, 140, 50));
 
-        date_collectDate.setFont(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
-        date_collectDate.setFuente(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
-        date_collectDate.setPlaceholder("Chọn ngày thu tiền");
-        jPanel2.add(date_collectDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 280, 300, -1));
+        checkButton.setBackground(new java.awt.Color(102, 153, 255));
+        checkButton.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
+        checkButton.setForeground(new java.awt.Color(255, 255, 255));
+        checkButton.setText("Tìm kiếm");
+        checkButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(checkButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 120, 140, 50));
 
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 110, 1920, 690));
+        jLabel2.setFont(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
+        jLabel2.setText("Tổng tiền thu");
+        jPanel2.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 220, 140, -1));
+
+        jLabel3.setFont(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
+        jLabel3.setText("Ngày thu");
+        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 280, 100, -1));
+
+        jLabel4.setFont(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
+        jLabel4.setText("Mã sinh viên");
+        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 70, -1, -1));
+
+        txt_studentId.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txt_studentId.setPlaceholder("Nhập mã sinh viên");
+        jPanel2.add(txt_studentId, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 50, 320, 50));
+
+        txt_money.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txt_money.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_moneyActionPerformed(evt);
+            }
+        });
+        jPanel2.add(txt_money, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 210, 320, 40));
+
+        date_penaltyDate.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        date_penaltyDate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                date_penaltyDateActionPerformed(evt);
+            }
+        });
+        jPanel2.add(date_penaltyDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 270, 320, 40));
+
+        tbl_issueDetails.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Mã phiếu mượn", "Mã sinh viên", "Tên sinh viên", "Mã sách", "Tên sách", "Giá sách", "Trạng thái"
+            }
+        ));
+        tbl_issueDetails.setColorBordeFilas(new java.awt.Color(255, 255, 255));
+        tbl_issueDetails.setColorBordeHead(new java.awt.Color(255, 255, 255));
+        tbl_issueDetails.setRowHeight(30);
+        tbl_issueDetails.setShowGrid(false);
+        tbl_issueDetails.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tbl_issueDetailsMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(tbl_issueDetails);
+
+        jPanel2.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 360, 1360, 250));
+
+        showAllButton.setBackground(new java.awt.Color(102, 153, 255));
+        showAllButton.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
+        showAllButton.setForeground(new java.awt.Color(255, 255, 255));
+        showAllButton.setText("Hiện tất cả");
+        showAllButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showAllButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(showAllButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 120, 140, 50));
+
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 110, 1920, 970));
 
         setSize(new java.awt.Dimension(1934, 1087));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    public void setIssueBookDetailsToTable() {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/quanlythuvien", "root", "");
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery("select * from issue_book_details where status = 'đã mất'");
+    public void setPenaltyDate() {
+        Date issueDate = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 
-            while (rs.next()) {
+        String formattedIssueDate = formatter.format(issueDate);
 
-                String bookID = rs.getString("bookID");
-                String bookName = rs.getString("bookName");
-                String studentID = rs.getString("studentID");
-                String studentName = rs.getString("StudentName");
-
-                String status = rs.getString("status");
-
-                Object[] obj = {bookID, bookName, studentID, studentName, status};
-                model = (DefaultTableModel) tbl_issueBookDetails1.getModel();
-                model.addRow(obj);
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        date_penaltyDate.setText(formattedIssueDate);
     }
 
-    public void clearTable() {
-        DefaultTableModel model = (DefaultTableModel) tbl_penalty.getModel();
+    public void setIssueDetailsToTable(List<Issue> issues) {
+        clearIssueTable();
+        for (Issue issue : issues) {
+            int issueId = issue.getId();
+            int studentId = issue.getStudentId();
+            String studentName = issue.getStudentName();
+            String bookId = issue.getBookId();
+            String bookName = issue.getBookName();
+
+            Book book = bookController.getBookById(issue.getBookId());
+
+            int price = book.getPrice();
+
+            String status = issue.getStatus();
+
+            Object[] obj = {issueId, studentId, studentName, bookId, bookName, price, status};
+            model = (DefaultTableModel) tbl_issueDetails.getModel();
+            model.addRow(obj);
+        }
+
+    }
+
+    public void refreshIssueTable() {
+        clearFormInput();
+        clearIssueTable();
+
+        List<Issue> issues = issueController.getAllViolatedIssue();
+
+        setIssueDetailsToTable(issues);
+    }
+
+    public void refreshPenaltyTable() {
+        clearFormInput();
+        clearPenaltyTable();
+
+        List<Penalty> penalties = penaltyController.getAllPenalties();
+
+        setPenaltyDetailsToTable(penalties);
+    }
+
+    public void clearIssueTable() {
+        DefaultTableModel model = (DefaultTableModel) tbl_issueDetails.getModel();
         model.setRowCount(0);
     }
 
-    public void setBookPenaltyDetailsToTable() {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/quanlythuvien", "root", "");
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery("select * from penalty");
+    public void clearPenaltyTable() {
+        DefaultTableModel model = (DefaultTableModel) tbl_penalty.getModel();
+        model.setRowCount(0);
 
-            while (rs.next()) {
-
-                String penaltyID = rs.getString("penaltyID");
-                String studentID = rs.getString("studentID");
-                String money = rs.getString("money");
-                String date = rs.getString("date");
-
-                Object[] obj = {penaltyID, studentID, money, date};
-                model = (DefaultTableModel) tbl_penalty.getModel();
-                model.addRow(obj);
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void importDataToCombobox() {
-        studentCombobox.removeAllItems();
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/quanlythuvien", "root", "");
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery("select studentID, studentName from issue_book_details where status = 'đã mất'");
-
-            while (rs.next()) {
-                String studentID = rs.getString("studentID");
-                String studentName = rs.getString("StudentName");
-                studentCombobox.addItem(studentID + " - " + studentName);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public int moneyPenalty(String studentId) {
-        int totalPenalty = 0;
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/quanlythuvien", "root", "");
-            Statement st = conn.createStatement();
-            String query = "SELECT SUM(b.price) AS total_penalty "
-                    + "FROM book_details b "
-                    + "JOIN issue_book_details i ON b.bookID = i.bookID "
-                    + "WHERE i.studentID = '" + studentId + "' AND i.status = 'đã mất'";
-            ResultSet rs = st.executeQuery(query);
-
-            if (rs.next()) {
-                totalPenalty = rs.getInt("total_penalty");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return totalPenalty;
-    }
-
-    public boolean addPenalty() {
-        boolean isAdded = false;
-
-        Date collectDate = date_collectDate.getDatoFecha();
-        long l1 = collectDate.getTime();
-        java.sql.Date sqlCollectDate = new java.sql.Date(l1);
-
-        String penaltyID = txt_penaltyID.getText();
-        String selectedItem = (String) studentCombobox.getSelectedItem();
-        if (selectedItem == null) {
-            JOptionPane.showMessageDialog(this, "Please select a student.");
-            return false;
-        }
-        String studentId = selectedItem.split(" - ")[0];
-        int totalPenalty = moneyPenalty(studentId);
-
-        try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/quanlythuvien", "root", "");
-            String sql = "insert into penalty(penaltyID, studentID, money, date) values(?, ?, ?, ?)";
-            PreparedStatement pst = con.prepareStatement(sql);
-            pst.setString(1, penaltyID);
-            pst.setString(2, studentId);
-            pst.setInt(3, totalPenalty);
-            pst.setDate(4, sqlCollectDate);
-
-            int rowCount = pst.executeUpdate();
-            if (rowCount > 0) {
-                isAdded = true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return isAdded;
     }
 
     public void clearFormInput() {
-        txt_penaltyID.setText("");
-        txt_money.setText("");
+        txt_studentId.setText("");
     }
 
-    private void tbl_penaltyMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_penaltyMouseClicked
+    public void setPenaltyDetailsToTable(List<Penalty> penalties) {
+        clearPenaltyTable();
 
-    }//GEN-LAST:event_tbl_penaltyMouseClicked
+        for (Penalty penalty : penalties) {
+            int id = penalty.getId();
+            int studetnId = penalty.getStudentId();
+            String studentName = penalty.getStudentName();
+            int penaltyAmount = penalty.getPenaltyAmount();
 
-    private void tbl_issueBookDetails1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_issueBookDetails1MouseClicked
-        clearTable();
-        setIssueBookDetailsToTable();
-    }//GEN-LAST:event_tbl_issueBookDetails1MouseClicked
+            LocalDate penaltyDate = penalty.getPenaltyDate();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private void btnLamMoiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLamMoiActionPerformed
-        clearTable();
-    }//GEN-LAST:event_btnLamMoiActionPerformed
+            String formattedPenaltyDate = penaltyDate.format(formatter);
 
-    private void studentComboboxPopupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent evt) {//GEN-FIRST:event_studentComboboxPopupMenuWillBecomeVisible
-        importDataToCombobox();
-    }//GEN-LAST:event_studentComboboxPopupMenuWillBecomeVisible
-
-    private void studentComboboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_studentComboboxActionPerformed
-        // Lấy chuỗi được chọn từ combo box
-        String selectedItem = (String) studentCombobox.getSelectedItem();
-        if (selectedItem != null) {
-            // Tách mã sinh viên từ chuỗi
-            String studentId = selectedItem.split(" - ")[0];
-            // Truyền mã sinh viên vào hàm tính tiền
-            int totalPenalty = moneyPenalty(studentId);
-            // Gán giá trị tiền phạt cho txt_money
-            txt_money.setText(String.valueOf(totalPenalty));
+            Object[] obj = {id, studetnId, studentName, penaltyAmount, formattedPenaltyDate};
+            model = (DefaultTableModel) tbl_penalty.getModel();
+            model.addRow(obj);
         }
-    }//GEN-LAST:event_studentComboboxActionPerformed
-
-    private void btnTaoPhieuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTaoPhieuActionPerformed
-        if (addPenalty()) {
-            JOptionPane.showMessageDialog(this, "Thêm phiếu phạt thành công");
-            clearTable();
-            setBookPenaltyDetailsToTable();
-            clearFormInput();
-        } else {
-            JOptionPane.showMessageDialog(this, "Thêm phiếu phạt thất bại");
-        }
-    }//GEN-LAST:event_btnTaoPhieuActionPerformed
+    }
 
     private void jLabel9MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel9MouseClicked
-        HomePage hp = new HomePage();
-        hp.setVisible(true);
-        dispose();
+
     }//GEN-LAST:event_jLabel9MouseClicked
 
-    private void jPanel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel4MouseClicked
+    private void backButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_backButtonMouseClicked
         HomePage homePage = new HomePage();
         homePage.setVisible(true);
         dispose();
-    }//GEN-LAST:event_jPanel4MouseClicked
+    }//GEN-LAST:event_backButtonMouseClicked
+
+    private void checkButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkButtonActionPerformed
+        try {
+            int studentId = Integer.parseInt(txt_studentId.getText());
+
+            List<Issue> issues = issueController.getViolatedIssueByStudentId(studentId);
+
+            setIssueDetailsToTable(issues);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Mã sinh viên không hợp lệ");
+        }
+    }//GEN-LAST:event_checkButtonActionPerformed
+
+    private void btnLamMoiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLamMoiActionPerformed
+        refreshPenaltyTable();
+    }//GEN-LAST:event_btnLamMoiActionPerformed
+
+    private void btnTaoPhieuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTaoPhieuActionPerformed
+        try {
+            int rowNo = tbl_issueDetails.getSelectedRow();
+
+            TableModel model = tbl_issueDetails.getModel();
+
+            int studentId = Integer.parseInt(model.getValueAt(rowNo, 1).toString());
+            String studentName = model.getValueAt(rowNo, 2).toString();
+            String bookId = model.getValueAt(rowNo, 3).toString();
+            String bookName = model.getValueAt(rowNo, 4).toString();
+            int penaltyAmount = Integer.parseInt(txt_money.getText());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            LocalDate penaltyDate = LocalDate.parse(date_penaltyDate.getText(), formatter);
+
+            Penalty penalty = new Penalty(bookId, bookName, studentId, studentName, penaltyAmount, penaltyDate);
+
+            if (penaltyController.addPenalty(penalty)) {
+                JOptionPane.showMessageDialog(this, "Thêm phiếu phạt thành công");
+
+                Issue issue = issueController.getViolatedIssueByBookIdAndStudentId(bookId, studentId);
+
+                if (issue.getStatus().equals("Quá hạn")) {
+                    issueController.updateById(issue.getId(), "Quá hạn - đã nộp phạt");
+
+                } else if (issue.getStatus().equals("Đã mất")) {
+                    issueController.updateById(issue.getId(), "Mất - đã nộp phạt");
+
+                }
+
+                refreshPenaltyTable();
+                refreshIssueTable();
+            } else {
+                JOptionPane.showMessageDialog(this, "Thêm phiếu phạt thất bại");
+            }
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Mã sinh viên không hợp lệ");
+        }
+    }//GEN-LAST:event_btnTaoPhieuActionPerformed
+
+    private void txt_moneyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_moneyActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txt_moneyActionPerformed
+
+    private void date_penaltyDateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_date_penaltyDateActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_date_penaltyDateActionPerformed
+
+    private void tbl_issueDetailsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_issueDetailsMouseClicked
+        int rowNo = tbl_issueDetails.getSelectedRow();
+        TableModel model = tbl_issueDetails.getModel();
+
+        String studentId = model.getValueAt(rowNo, 1).toString();
+
+        int fee = 20000;
+        if (model.getValueAt(rowNo, 6).toString().equals("Đã mất")) {
+            fee = Integer.parseInt(model.getValueAt(rowNo, 5).toString()) * 2;
+        }
+
+        txt_money.setText(String.valueOf(fee));
+        txt_studentId.setText(studentId);
+        btnTaoPhieu.setEnabled(true);
+    }//GEN-LAST:event_tbl_issueDetailsMouseClicked
+
+    private void showAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllButtonActionPerformed
+        refreshIssueTable();
+    }//GEN-LAST:event_showAllButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -470,25 +505,25 @@ public class BookPenaltyForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel backButton;
     private javax.swing.JButton btnLamMoi;
     private javax.swing.JButton btnTaoPhieu;
-    private rojeru_san.componentes.RSDateChooser date_collectDate;
+    private javax.swing.JButton checkButton;
+    private app.bolivia.swing.JCTextField date_penaltyDate;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane5;
-    private javax.swing.JScrollPane jScrollPane6;
-    private java.awt.Label label1;
-    private java.awt.Label label2;
-    private java.awt.Label label3;
-    private java.awt.Label label4;
-    private javax.swing.JComboBox<String> studentCombobox;
-    private rojeru_san.complementos.RSTableMetro tbl_issueBookDetails1;
+    private javax.swing.JButton showAllButton;
+    private rojeru_san.complementos.RSTableMetro tbl_issueDetails;
     private rojeru_san.complementos.RSTableMetro tbl_penalty;
-    private java.awt.TextField txt_money;
-    private java.awt.TextField txt_penaltyID;
+    private app.bolivia.swing.JCTextField txt_money;
+    private app.bolivia.swing.JCTextField txt_studentId;
     // End of variables declaration//GEN-END:variables
 }

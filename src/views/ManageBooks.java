@@ -47,6 +47,7 @@ public class ManageBooks extends javax.swing.JFrame {
         int quantity;
         int price;
 
+        
         if (txtQuantity.getText().equals("")) {
             quantity = 0;
         } else {

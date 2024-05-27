@@ -38,7 +38,7 @@ public class StudentDAO {
                 LocalDate birthday = rs.getDate("birthday").toLocalDate();
                 String email = rs.getString("email");
                 String major = rs.getString("major");
-
+                
                 students.add(new Student(id, name, gender, birthday, email, major));
             }
         } catch (Exception e) {
@@ -107,7 +107,7 @@ public class StudentDAO {
         try {
             Connection connect = DBConnection.getConnection();
 
-            String sql = "UPDATE student SET id = ?, name = ?, gender = ?, birthday = ?, email = ?, major = ? WHERE id = ?";
+            String sql = "UPDATE student SET id = ?, name = ?, gender = ?, birthday = ?, email = ?, major = ?, is_banned = ? WHERE id = ?";
             PreparedStatement pst = connect.prepareStatement(sql);
 
             pst.setInt(1, student.getId());
@@ -116,7 +116,8 @@ public class StudentDAO {
             pst.setDate(4, java.sql.Date.valueOf(student.getBirthday()));
             pst.setString(5, student.getEmail());
             pst.setString(6, student.getMajor());
-            pst.setInt(7, student.getId());
+            pst.setInt(7, student.getIsBanned());
+            pst.setInt(8, student.getId());
 
             int updatedRowCount = pst.executeUpdate();
 
@@ -153,8 +154,9 @@ public class StudentDAO {
                 LocalDate birthday = rs.getDate("birthday").toLocalDate();
                 String email = rs.getString("email");
                 String major = rs.getString("major");
-
-                student = new Student(id, name, gender, birthday, email, major);
+                int isBanned = rs.getInt("is_banned");
+                
+                student = new Student(id, name, gender, birthday, email, major, isBanned);
             } else {
                 student = null;
             }

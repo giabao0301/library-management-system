@@ -87,11 +87,12 @@ public class IssueBook extends javax.swing.JFrame {
         try {
             int days = Integer.parseInt(txt_issueDays.getText());
             cal.add(Calendar.DAY_OF_MONTH, days);
+            String sIssueDate = formatter.format(cal.getTime());
+            txt_dueDate.setText(sIssueDate);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Số ngày mượn không hợp lệ");
         }
-        String sIssueDate = formatter.format(cal.getTime());
-        txt_dueDate.setText(sIssueDate);
+
     }
 
     public boolean validateUserInput() {
@@ -104,6 +105,10 @@ public class IssueBook extends javax.swing.JFrame {
             int id = Integer.parseInt(txt_studentId.getText());
             Student student = studentController.getStudentById(id);
             if (student != null) {
+                if (student.getIsBanned() == 1) {
+                    JOptionPane.showMessageDialog(this, "Sinh viên bị cấm mượn sách");
+                    return false;
+                }
                 lbl_studentName.setText(student.getName());
                 lbl_email.setText(student.getEmail());
                 comboBoxMajor.setSelectedItem(student.getMajor());
@@ -133,7 +138,7 @@ public class IssueBook extends javax.swing.JFrame {
         }
 
         if (isAlreadyIssued()) {
-            JOptionPane.showMessageDialog(this, "Bạn đã mượn quyển sách này");
+            JOptionPane.showMessageDialog(this, "Sinh viên đang mượn quyển sách này");
             return false;
         }
 
@@ -317,7 +322,7 @@ public class IssueBook extends javax.swing.JFrame {
         jLabel18.setText("Số ngày mượn");
         panel_main.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(900, 340, 150, -1));
 
-        submitButton.setBackground(new java.awt.Color(100, 136, 234));
+        submitButton.setBackground(new java.awt.Color(0, 255, 0));
         submitButton.setText("Cho mượn");
         submitButton.setEnabled(false);
         submitButton.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
@@ -530,10 +535,10 @@ public class IssueBook extends javax.swing.JFrame {
             // Parse the string into a Date object
             Date issueDate = dateFormat.parse(txt_issueDate.getText());
             Date dueDate = dateFormat.parse(txt_dueDate.getText());
-            
+
             if (issueController.issueBook(book, student, issueDate, dueDate)) {
                 JOptionPane.showMessageDialog(this, "Mượn sách thành công");
-                
+
                 book.setQuantity(book.getQuantity() - 1);
                 bookController.updateBook(book);
                 clearUserInput();
@@ -547,8 +552,8 @@ public class IssueBook extends javax.swing.JFrame {
     }//GEN-LAST:event_submitButtonActionPerformed
 
     private void checkButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkButtonActionPerformed
-        setDueDate();
         if (validateUserInput()) {
+            setDueDate();
             submitButton.setEnabled(true);
         }
     }//GEN-LAST:event_checkButtonActionPerformed

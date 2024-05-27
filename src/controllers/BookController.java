@@ -3,6 +3,7 @@ package controllers;
 import java.util.List;
 import models.Book.Book;
 import models.Book.BookDAO;
+import views.BookPenaltyForm;
 import views.IssueBook;
 import views.ManageBooks;
 import views.ReturnBook;
@@ -21,7 +22,7 @@ public class BookController {
     private IssueBook issueBook;
     private ReturnBook returnBook;
     private BookDAO bookDAO;
-
+    private BookPenaltyForm bookPenaltyForm;
     
     public BookController(ManageBooks manageBooks) {
         this.manageBooks = manageBooks;
@@ -35,6 +36,11 @@ public class BookController {
 
     public BookController(ReturnBook returnBook) {
         this.returnBook = returnBook;
+        bookDAO = new BookDAO();
+    }
+    
+    public BookController(BookPenaltyForm bookPenaltyForm) {
+        this.bookPenaltyForm = bookPenaltyForm;
         bookDAO = new BookDAO();
     }
     

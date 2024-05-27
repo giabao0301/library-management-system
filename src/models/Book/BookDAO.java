@@ -143,8 +143,8 @@ public class BookDAO {
 
             pst.setString(1, book.getId());
             pst.setString(2, book.getTitle());
-            pst.setString(3, book.getGenre());
-            pst.setString(4, book.getAuthor());
+            pst.setString(3, book.getAuthor());
+            pst.setString(4, book.getGenre());
             pst.setString(5, book.getPublisher());
             pst.setInt(6, book.getQuantity());
             pst.setDouble(7, book.getPrice());

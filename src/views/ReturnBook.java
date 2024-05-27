@@ -325,7 +325,7 @@ public class ReturnBook extends javax.swing.JFrame {
         });
         panel_main.add(dangerButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(1200, 560, 210, -1));
 
-        submitButton.setBackground(new java.awt.Color(100, 136, 234));
+        submitButton.setBackground(new java.awt.Color(0, 255, 0));
         submitButton.setText("Hoàn tất");
         submitButton.setEnabled(false);
         submitButton.setFont(new java.awt.Font("Montserrat SemiBold", 0, 18)); // NOI18N
@@ -384,15 +384,17 @@ public class ReturnBook extends javax.swing.JFrame {
     }//GEN-LAST:event_lbl_bookNameActionPerformed
 
     private void dangerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dangerButtonActionPerformed
-        Book book = bookController.getBookById(txt_bookId.getText());
-
         try {
             int id = Integer.parseInt(lbl_issueId.getText());
+            int studentId = Integer.parseInt(txt_studentId.getText());
 
             int result = JOptionPane.showConfirmDialog(this, "Xác nhận mất sách", "", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 
             if (result == JOptionPane.OK_OPTION) {
                 issueController.returnBook(id, "Đã mất");
+                Student student = studentController.getStudentById(studentId);
+                student.setIsBanned(1);
+                studentController.updateStudent(student);
             }
 
             clearUserInput();
@@ -412,11 +414,16 @@ public class ReturnBook extends javax.swing.JFrame {
             String status = "Đã trả";
 
             Date dueDate = new SimpleDateFormat("dd/MM/yyyy").parse(lbl_dueDate.getText());
+            
+            int studentId = Integer.parseInt(txt_studentId.getText());
 
             //          Kiểm tra nếu ngày trả sách lớn hơn hạn trả
             if (dueDate.before(new Date())) {
                 status = "Quá hạn";
                 JOptionPane.showMessageDialog(this, "Đã quá hạn trả sách");
+                Student student = studentController.getStudentById(studentId);
+                student.setIsBanned(1);
+                studentController.updateStudent(student);
             }
 
             if (issueController.returnBook(id, status)) {
