@@ -18,16 +18,25 @@ public class Student {
     private String email;
     private String major;
     private int isBanned;
+    private int issuedBooks;
     
     public Student() {
         
     }
-
+    
     public Student(int id, String name) {
         this.id = id;
         this.name = name;
     }
 
+    public Student(int id, String name, int issuedBooks) {
+        this.id = id;
+        this.name = name;
+        this.issuedBooks = issuedBooks;
+    }
+
+    
+    
     public Student(int id, String name, String gender, LocalDate birthday, String email, String major, int isBanned) {
         this.id = id;
         this.name = name;
@@ -104,5 +113,14 @@ public class Student {
     public void setIsBanned(int isBanned) {
         this.isBanned = isBanned;
     }
+
+    public int getIssuedBooks() {
+        return issuedBooks;
+    }
+
+    public void setIssuedBooks(int issuedBooks) {
+        this.issuedBooks = issuedBooks;
+    }
+    
     
 }

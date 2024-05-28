@@ -7,6 +7,7 @@ package controllers;
 import java.util.List;
 import models.Student.Student;
 import models.Student.StudentDAO;
+import views.HomePage;
 import views.IssueBook;
 import views.ManageStudents;
 import views.ReturnBook;
@@ -21,7 +22,13 @@ public class StudentController {
     private StudentDAO studentDAO;
     private IssueBook issueBook;
     private ReturnBook returnBook;
-    
+    private HomePage homePage;
+
+    public StudentController(HomePage homePage) {
+        this.homePage = homePage;
+        studentDAO = new StudentDAO();
+    }
+
     public StudentController(ManageStudents manageStudents) {
         this.manageStudents = manageStudents;
         studentDAO = new StudentDAO();
@@ -31,12 +38,12 @@ public class StudentController {
         this.issueBook = issueBook;
         studentDAO = new StudentDAO();
     }
-    
-     public StudentController(ReturnBook returnBook) {
+
+    public StudentController(ReturnBook returnBook) {
         this.returnBook = returnBook;
         studentDAO = new StudentDAO();
     }
-    
+
     public List<Student> getAllStudents() {
         return studentDAO.findAllStudents();
     }
@@ -64,15 +71,15 @@ public class StudentController {
         }
         return false;
     }
-    
+
     public Student getStudentById(int studentId) {
         return studentDAO.findById(studentId);
     }
-    
-    public List<String >getAllMajors() {
+
+    public List<String> getAllMajors() {
         return studentDAO.findAllMajors();
     }
-    
+
     public List<Student> getAllByMajor(String major) {
         return studentDAO.findAllByMajor(major);
     }

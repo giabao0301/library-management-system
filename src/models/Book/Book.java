@@ -17,6 +17,7 @@ public class Book {
     private String publisher;
     private int quantity;
     private int price;
+    private int issuedQuantity;
 
     public Book() {
     }
@@ -25,7 +26,13 @@ public class Book {
         this.id = id;
         this.title = title;
     }
-    
+
+    public Book(String id, String title, int issuedQuantity) {
+        this.id = id;
+        this.title = title;
+        this.issuedQuantity = issuedQuantity;
+    }
+
     public Book(String id, String title, String author, String genre, String publisher, int price, int quantity) {
         this.id = id;
         this.title = title;
@@ -90,6 +97,14 @@ public class Book {
 
     public void setPrice(int price) {
         this.price = price;
+    }
+
+    public int getIssuedQuantity() {
+        return issuedQuantity;
+    }
+
+    public void setIssuedQuantity(int issuedQuantity) {
+        this.issuedQuantity = issuedQuantity;
     }
 
 }

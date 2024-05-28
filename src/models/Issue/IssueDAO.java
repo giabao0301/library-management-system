@@ -5,6 +5,7 @@
 package models.Issue;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import models.Book.Book;
@@ -190,7 +191,7 @@ public class IssueDAO {
 
         return null;
     }
-    
+
     public Issue findViolatedIssueByBookIdAndStudentId(String bookId, int studentId) {
         try {
             Connection con = DBConnection.getConnection();
@@ -205,7 +206,6 @@ public class IssueDAO {
             pst.setString(4, "Đã mất");
 
             ResultSet rs = pst.executeQuery();
-
 
             if (rs.next()) {
                 int id = rs.getInt("id");
@@ -224,7 +224,7 @@ public class IssueDAO {
 
         return null;
     }
-    
+
     public List<Issue> findAllViolatedIssue() {
         try {
             Connection con = DBConnection.getConnection();
@@ -259,6 +259,77 @@ public class IssueDAO {
             e.printStackTrace();
         }
 
+        return null;
+    }
+
+    public List<Issue> findAll() {
+        try {
+            Connection con = DBConnection.getConnection();
+
+            String sql = "select * from issue";
+
+            PreparedStatement pst = con.prepareStatement(sql);
+
+            ResultSet rs = pst.executeQuery();
+
+            List<Issue> issues = new ArrayList<>();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String bookId = rs.getString("book_id");
+                String bookName = rs.getString("book_name");
+                int studentId = rs.getInt("student_id");
+                String studentName = rs.getString("student_name");
+                LocalDate issueDate = rs.getDate("issue_date").toLocalDate();
+                LocalDate dueDate = rs.getDate("due_date").toLocalDate();
+                String status = rs.getString("status");
+
+                issues.add(new Issue(id, bookId, bookName, studentId, studentName, issueDate, dueDate, status));
+            }
+
+            return issues;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public List<Issue> findAllBetweenDates(Date dateFrom, Date dateTo) {
+        try {
+            Connection con = DBConnection.getConnection();
+            String sql = "select * from issue where issue_date BETWEEN ? AND ?";
+            PreparedStatement pst = con.prepareStatement(sql);
+
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            String sDateFrom = formatter.format(dateFrom);
+            String sDateTo = formatter.format(dateTo);
+            
+            pst.setString(1, sDateFrom);
+            pst.setString(2, sDateTo);
+
+            ResultSet rs = pst.executeQuery();
+
+            List<Issue> issues = new ArrayList<>();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String bookId = rs.getString("book_id");
+                String bookName = rs.getString("book_name");
+                int studentId = rs.getInt("student_id");
+                String studentName = rs.getString("student_name");
+                LocalDate issueDate = rs.getDate("issue_date").toLocalDate();
+                LocalDate dueDate = rs.getDate("due_date").toLocalDate();
+                String status = rs.getString("status");
+
+                issues.add(new Issue(id, bookId, bookName, studentId, studentName, issueDate, dueDate, status));
+
+            }
+            return issues;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }

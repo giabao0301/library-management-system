@@ -4,6 +4,7 @@ import java.util.List;
 import models.Book.Book;
 import models.Book.BookDAO;
 import views.BookPenaltyForm;
+import views.HomePage;
 import views.IssueBook;
 import views.ManageBooks;
 import views.ReturnBook;
@@ -23,6 +24,12 @@ public class BookController {
     private ReturnBook returnBook;
     private BookDAO bookDAO;
     private BookPenaltyForm bookPenaltyForm;
+    private HomePage homePage;
+    
+    public BookController(HomePage homePage) {
+        this.homePage = homePage;
+        bookDAO = new BookDAO();
+    }
     
     public BookController(ManageBooks manageBooks) {
         this.manageBooks = manageBooks;

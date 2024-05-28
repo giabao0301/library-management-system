@@ -4,6 +4,7 @@
  */
 package views;
 
+import controllers.IssueController;
 import utils.DBConnection;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -12,7 +13,9 @@ import java.sql.Statement;
 import javax.swing.table.DefaultTableModel;
 import java.util.*;
 import java.sql.PreparedStatement;
+import java.time.LocalDate;
 import javax.swing.JOptionPane;
+import models.Issue.Issue;
 
 /**
  *
@@ -20,10 +23,14 @@ import javax.swing.JOptionPane;
  */
 public class ViewAllRecord extends javax.swing.JFrame {
 
+    private IssueController issueController;
     DefaultTableModel model;
+
     public ViewAllRecord() {
+        issueController = new IssueController(this);
         initComponents();
         setIssueBookDetailsToTable();
+        setExtendedState(MAXIMIZED_BOTH);
     }
 
     /**
@@ -66,32 +73,34 @@ public class ViewAllRecord extends javax.swing.JFrame {
             .addGap(0, 0, Short.MAX_VALUE)
         );
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 80, 360, 10));
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 90, 360, 10));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 36)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("Danh sách mượn trả");
-        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 20, 370, 60));
+        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 30, 370, 60));
 
         jLabel18.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
         jLabel18.setForeground(new java.awt.Color(255, 255, 255));
         jLabel18.setText("Ngày mượn");
-        jPanel1.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 140, 120, -1));
+        jPanel1.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 150, 120, -1));
 
         jLabel17.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
         jLabel17.setForeground(new java.awt.Color(255, 255, 255));
         jLabel17.setText("Ngày trả");
-        jPanel1.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 140, 90, -1));
+        jPanel1.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 150, 90, -1));
 
         date_fromDate.setFont(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
+        date_fromDate.setFormatoFecha("dd/MM/yyyy");
         date_fromDate.setFuente(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
         date_fromDate.setPlaceholder("Chọn ngày mượn");
-        jPanel1.add(date_fromDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 130, 300, -1));
+        jPanel1.add(date_fromDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 140, 300, -1));
 
         date_toDate.setFont(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
+        date_toDate.setFormatoFecha("dd/MM/yyyy");
         date_toDate.setFuente(new java.awt.Font("Montserrat", 1, 18)); // NOI18N
         date_toDate.setPlaceholder("Chọn ngày trả");
-        jPanel1.add(date_toDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 130, 290, -1));
+        jPanel1.add(date_toDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(910, 140, 290, -1));
 
         jButton1.setBackground(new java.awt.Color(51, 102, 255));
         jButton1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
@@ -102,7 +111,7 @@ public class ViewAllRecord extends javax.swing.JFrame {
                 jButton1ActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(1150, 130, 110, 40));
+        jPanel1.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(1250, 140, 110, 40));
 
         jLabel8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/AddNewBookIcons/51516_arrow_back_left_icon.png"))); // NOI18N
         jLabel8.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -131,7 +140,7 @@ public class ViewAllRecord extends javax.swing.JFrame {
 
         jPanel1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 50, 40));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1480, 240));
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1920, 240));
 
         panel_table.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -140,7 +149,7 @@ public class ViewAllRecord extends javax.swing.JFrame {
 
             },
             new String [] {
-                "STT", "Tên sách", "Tên sinh viên", "Ngày mượn", "Ngày trả", "Trạng thái"
+                "Mã phiếu mượn", "Tên sách", "Tên sinh viên", "Ngày mượn", "Ngày trả", "Trạng thái"
             }
         ));
         tbl_issueBookDetails.setColorBordeFilas(new java.awt.Color(255, 255, 255));
@@ -154,89 +163,59 @@ public class ViewAllRecord extends javax.swing.JFrame {
         });
         jScrollPane5.setViewportView(tbl_issueBookDetails);
 
-        panel_table.add(jScrollPane5, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 50, 1280, 440));
+        panel_table.add(jScrollPane5, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 50, 1280, 440));
 
-        getContentPane().add(panel_table, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 240, 1410, 570));
+        getContentPane().add(panel_table, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 240, 1920, 570));
 
-        setSize(new java.awt.Dimension(1425, 810));
+        setSize(new java.awt.Dimension(1934, 1087));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    
     public void setIssueBookDetailsToTable() {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/quanlythuvien", "root", "");
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery("select * from issue_book_details");
+        List<Issue> issues = issueController.getAll();
 
-            while (rs.next()) {
-                int serialID = rs.getInt("id");
-                String bookName = rs.getString("bookName");
-                String studentName = rs.getString("StudentName");
-                String issueDate = rs.getString("issueDate");
-                String dueDate = rs.getString("dueDate");
-                String status = rs.getString("status");
-                
-                Object[] obj = { serialID, bookName, studentName, issueDate, dueDate, status };
-                model = (DefaultTableModel) tbl_issueBookDetails.getModel();
-                model.addRow(obj);
+        for (Issue issue : issues) {
+            int id = issue.getId();
+            String bookName = issue.getBookName();
+            int studentName = issue.getStudentId();
+            LocalDate issueDate = issue.getIssueDate();
+            LocalDate dueDate = issue.getDueDate();
+            String status = issue.getStatus();
 
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            Object[] obj = {id, bookName, studentName, issueDate, dueDate, status};
+            model = (DefaultTableModel) tbl_issueBookDetails.getModel();
+            model.addRow(obj);
         }
     }
-    
-    //method to clear table
-    public void clearTable(){
+
+//method to clear table
+    public void clearTable() {
         DefaultTableModel model = (DefaultTableModel) tbl_issueBookDetails.getModel();
         model.setRowCount(0);
     }
-    
-    //to fetch the record using date fields
-    public void search(){
-        Date uFromDate = date_fromDate.getDatoFecha();
-        Date uToDate = date_toDate.getDatoFecha();
 
-        long l1 = uFromDate.getTime();
-        long l2 = uToDate.getTime();
+    //to fetch the record using date fields
+    public void search() {
+        Date dateFrom = date_fromDate.getDatoFecha();
+        Date dateTo = date_toDate.getDatoFecha();
+
+        List<Issue> issues = issueController.getAllBetweenDates(dateFrom, dateTo);
         
-        java.sql.Date fromDate = new java.sql.Date(l1);
-        java.sql.Date toDate = new java.sql.Date(l2);
-        
-        try {
-            Connection con = DBConnection.getConnection();
-            String sql = "select * from issue_book_details where issueDate BETWEEN ? AND ?";
-            PreparedStatement pst = con.prepareStatement(sql);
-            pst.setDate(1, fromDate);
-            pst.setDate(2, toDate);
-            
-            ResultSet rs = pst.executeQuery();
-            
-            if(rs.next()){
-                JOptionPane.showMessageDialog(this,"Không tìm thấy");
-            } else {
-                while(rs.next()){
-                int serialID = rs.getInt("id");
-                String bookName = rs.getString("bookName");
-                String studentName = rs.getString("StudentName");
-                String issueDate = rs.getString("issueDate");
-                String dueDate = rs.getString("dueDate");
-                String status = rs.getString("status");
-                
-                Object[] obj = { serialID, bookName, studentName, issueDate, dueDate, status };
-                model = (DefaultTableModel) tbl_issueBookDetails.getModel();
-                model.addRow(obj);
-                }  
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        for (Issue issue : issues) {
+            int id = issue.getId();
+            String bookName = issue.getBookName();
+            int studentName = issue.getStudentId();
+            LocalDate issueDate = issue.getIssueDate();
+            LocalDate dueDate = issue.getDueDate();
+            String status = issue.getStatus();
+            Object[] obj = {id, bookName, studentName, issueDate, dueDate, status};
+            model = (DefaultTableModel) tbl_issueBookDetails.getModel();
+            model.addRow(obj);
         }
     }
-    
+
     private void tbl_issueBookDetailsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_issueBookDetailsMouseClicked
-        
+
     }//GEN-LAST:event_tbl_issueBookDetailsMouseClicked
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -264,16 +243,24 @@ public class ViewAllRecord extends javax.swing.JFrame {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
+
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ViewAllRecord.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ViewAllRecord.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ViewAllRecord.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ViewAllRecord.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ViewAllRecord.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ViewAllRecord.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ViewAllRecord.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ViewAllRecord.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
